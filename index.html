@@ -47,6 +47,12 @@ main{width:min(1180px,calc(100% - 32px));margin:20px auto 48px}
 .b-p{--c:var(--p)}.b-g{--c:var(--g)}.b-e{--c:var(--e)}
 .modes{border:0;padding:0;margin:0;display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .modes legend{font-weight:700;margin-bottom:8px}
+.format{margin:1.1rem 0}
+.format-select{display:block;width:100%;max-width:25rem;margin-top:.35rem;padding:.55rem .7rem;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:8px;font:inherit}
+.quantities{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:.65rem;margin:.75rem 0}
+.quantity{display:flex;justify-content:space-between;align-items:center;gap:.65rem;padding:.6rem .7rem;border:1px solid var(--line);border-radius:8px}
+.quantity input{width:5.8rem;padding:.35rem;color:inherit;background:var(--surface);border:1px solid var(--line);border-radius:6px;font:inherit}
+.custom-total{margin:.5rem 0 1rem}
 .mode{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);border-radius:12px;padding:12px 14px;cursor:pointer}
 .mode:has(input:checked){border-color:var(--brand);background:var(--brand-soft)}
 .mode input{margin-top:.35rem;accent-color:var(--brand)}
@@ -159,11 +165,23 @@ kbd{font:600 .75rem ui-monospace,monospace;border:1px solid var(--line);border-b
  <section id="start">
   <div class="card hero">
    <h2>Monte sua tentativa</h2>
-   <p class="muted">40 questões sorteadas do banco com alternativas embaralhadas · 2,5 pontos por questão.</p>
-   <div class="blocks">
+   <p class="muted" id="format-description">40 questões sorteadas do banco com alternativas embaralhadas · 2,5 pontos por questão.</p>
+   <div class="format">
+    <label for="exam-format"><b>Formato</b></label>
+    <select id="exam-format" class="format-select">
+     <option value="edital">Formato do edital · 40 questões</option>
+     <option value="custom">Personalizado · escolher por matéria</option>
+    </select>
+   </div>
+   <div class="blocks" id="fixed-blocks">
     <div class="block b-p"><strong>10</strong><span>Língua Portuguesa</span></div>
     <div class="block b-g"><strong>10</strong><span>Matemática e Raciocínio Lógico, Informática, Direito Administrativo e Constitucional</span></div>
     <div class="block b-e"><strong>20</strong><span>Conhecimentos Específicos</span></div>
+   </div>
+   <div id="custom-controls" hidden>
+    <p class="muted small" id="custom-hint">Digite 0 para excluir uma matéria.</p>
+    <div id="quantities" class="quantities"></div>
+    <p id="custom-total" class="custom-total" role="status"></p>
    </div>
    <fieldset class="modes"><legend>Modo</legend>
     <label class="mode"><input type="radio" name="mode" value="prova" checked><span><b>Prova</b><small>Gabarito só depois da entrega, como no dia.</small></span></label>
@@ -462,6 +480,54 @@ Object.assign(adapted,{
 });
 if(typeof module!=='undefined') module.exports={bank,sources,labels};
 const quotas = {p:10,g:10,e:20};
+const subjects = {
+ p: 'Língua Portuguesa',
+ math: 'Matemática e Raciocínio Lógico',
+ info: 'Informática',
+ law: 'Direito Administrativo e Constitucional',
+ e: 'Conhecimentos Específicos'
+};
+function subjectOf(q){
+ if(q.block!=='g') return q.block;
+ if(q.topic==='Direito Administrativo e Constitucional · Informática') return 'mixed';
+ if(q.topic.startsWith('Direito Administrativo e Constitucional')) return 'law';
+ if(q.topic.startsWith('Informática')) return 'info';
+ return 'math';
+}
+function subjectPools(){
+ const pools=Object.fromEntries(Object.keys(subjects).map(key=>[key,[]]));
+ for(const q of bank) pools[subjectOf(q)]?.push(q);
+ return pools;
+}
+function drawCustom(counts,previous=[],random=Math.random){
+ const pools=subjectPools();
+ const previousIds=new Set(previous);
+ return Object.keys(subjects).flatMap(key=>{
+  const count=counts[key];
+  if(!Number.isSafeInteger(count)||count<0||count>pools[key].length) throw RangeError('Quantidade inválida para '+subjects[key]);
+  if(count===0) return [];
+  const candidates=shuffle(pools[key],random);
+  const ordered=[...candidates.filter(q=>!previousIds.has(q.id)),...candidates.filter(q=>previousIds.has(q.id))];
+  const families=new Set();
+  const preferred=[];
+  const remaining=[];
+  for(const q of ordered){
+   if(families.has(q.family)) remaining.push(q);
+   else { families.add(q.family); preferred.push(q); }
+  }
+  return [...preferred,...remaining].slice(0,count).map(q=>({...q,options:shuffle(q.options,random)}));
+ });
+}
+function scoreGroups(questions,answers,custom){
+ const groups={};
+ for(const q of questions){
+  const key=custom?subjectOf(q):q.block;
+  groups[key]??={total:0,hits:0};
+  groups[key].total++;
+  if(answers[q.id]===q.correct) groups[key].hits++;
+ }
+ return groups;
+}
 function shuffle(items, random=Math.random){
  const result=items.slice();
  for(let i=result.length-1;i>0;i--){
@@ -763,6 +829,7 @@ for(const q of bank){
 const $=id=>document.getElementById(id);
 const KEY='simulado4b:tentativa:v1';
 const THEME_KEY='simulado4b:tema';
+const FORMAT_KEY='simulado4b:formato';
 const shortLabels={p:'Português',g:'Gerais',e:'Específicos'};
 const store={
  get(k){try{return JSON.parse(localStorage.getItem(k))}catch{return null}},
@@ -770,6 +837,50 @@ const store={
 };
 let S=null;
 let ticker=null;
+const quantityInputs={};
+const groupFor=q=>S.format==='custom'?subjectOf(q):q.block;
+const groupLabels=()=>S.format==='custom'?subjects:shortLabels;
+function customCounts(){
+ return Object.fromEntries(Object.entries(quantityInputs).map(([key,input])=>[key,input.value.trim()===''?0:input.valueAsNumber]));
+}
+function refreshFormat(){
+ const custom=$('exam-format').value==='custom';
+ $('fixed-blocks').hidden=custom;
+ $('custom-controls').hidden=!custom;
+ $('format-description').textContent=custom
+  ?'Escolha quantas questões quer de cada matéria. A nota é proporcional aos acertos.'
+  :'40 questões sorteadas do banco com alternativas embaralhadas · 2,5 pontos por questão.';
+ const counts=customCounts();
+ const total=Object.values(counts).reduce((sum,n)=>sum+n,0);
+ const invalid=Object.entries(counts).some(([key,n])=>!Number.isSafeInteger(n)||n<0||n>Number(quantityInputs[key].max));
+ $('custom-total').textContent=invalid?'Use apenas números inteiros dentro dos limites de cada matéria.':
+  total===0?'Escolha pelo menos uma questão.':'Total: '+total.toLocaleString('pt-BR')+(total===1?' questão':' questões');
+ $('begin').disabled=custom&&(invalid||total===0);
+ return {custom,counts};
+}
+function initFormats(){
+ const saved=store.get(FORMAT_KEY);
+ for(const [key,pool] of Object.entries(subjectPools())){
+  const label=el('label',undefined,'quantity');
+  label.append(el('span',subjects[key]));
+  const input=el('input');
+  input.type='number';
+  input.inputMode='numeric';
+  input.min='0';
+  input.max=String(pool.length);
+  input.step='1';
+  input.value=String(saved?.counts?.[key]??0);
+  input.setAttribute('aria-describedby','custom-hint');
+  input.title='Máximo: '+pool.length;
+  input.addEventListener('input',refreshFormat);
+  label.append(input);
+  $('quantities').append(label);
+  quantityInputs[key]=input;
+ }
+ $('exam-format').value=saved?.custom?'custom':'edital';
+ $('exam-format').addEventListener('change',refreshFormat);
+ refreshFormat();
+}
 
 function el(tag,text,className){
  const n=document.createElement(tag);
@@ -814,11 +925,16 @@ function refreshStart(){
  } else btn.hidden=true;
 }
 function begin(){
+ const format=refreshFormat();
+ if($('begin').disabled) return;
  const saved=store.get(KEY);
  if(saved&&!saved.submitted&&Object.keys(saved.answers||{}).length&&
     !confirm('Há uma tentativa em andamento. Descartá-la e gerar outro simulado?')) return;
  const mode=document.querySelector('input[name=mode]:checked').value;
- S={questions:draw(saved?.questions?.map(q=>q.id)||[]),answers:{},marked:[],cursor:0,submitted:false,mode,startedAt:Date.now(),finishedAt:null,filter:'all'};
+ const previous=saved?.questions?.map(q=>q.id)||[];
+ const questions=format.custom?drawCustom(format.counts,previous):draw(previous);
+ S={questions,answers:{},marked:[],cursor:0,submitted:false,mode,format:format.custom?'custom':'edital',startedAt:Date.now(),finishedAt:null,filter:'all'};
+ store.set(FORMAT_KEY,format);
  save();
  openExam(0);
 }
@@ -891,7 +1007,7 @@ function render(){
  const q=cur();
  const response=S.answers[q.id];
  const lock=locked(q);
- $('chip').textContent=shortLabels[q.block];
+ $('chip').textContent=groupLabels()[groupFor(q)];
  $('chip').className='chip '+q.block;
  $('topic').textContent=q.topic;
  $('qnum').textContent='Questão '+(S.cursor+1)+' de '+S.questions.length;
@@ -953,12 +1069,12 @@ function renderSide(){
   return b;
  }));
 
- const groups=['p','g','e'].map(block=>{
-  const wrap=el('div',undefined,'navgroup '+block);
-  wrap.append(el('h3',shortLabels[block]));
+ const groups=Object.entries(groupLabels()).filter(([key])=>S.questions.some(q=>groupFor(q)===key)).map(([key,label])=>{
+  const wrap=el('div',undefined,'navgroup '+(key==='p'||key==='e'?key:'g'));
+  wrap.append(el('h3',label));
   const grid=el('div',undefined,'grid');
   S.questions.forEach((q,i)=>{
-   if(q.block!==block) return;
+   if(groupFor(q)!==key) return;
    const b=el('button',i+1);b.type='button';
    const o=outcome(q),rev=locked(q);
    if(rev) b.classList.add(o==='blank'?'blank-r':o);
@@ -998,15 +1114,18 @@ function submit(){
 function openResult(){
  show('result');
  const sc=grade(S.questions,S.answers);
+ const custom=S.format==='custom';
+ const groups=scoreGroups(S.questions,S.answers,custom);
+ const score=custom?sc.hits*100/S.questions.length:sc.points;
  const blank=S.questions.filter(q=>!answered(q)).length;
  const wrong=S.questions.length-blank-sc.hits;
  const area=$('result');
  area.replaceChildren();
 
  const top=el('div',undefined,'res-top');
- const ring=el('div',undefined,'score '+(sc.pass?'pass':'fail'));
- ring.style.setProperty('--v',sc.points);
- const inner=el('div');inner.append(el('b',sc.points.toLocaleString('pt-BR')),el('span','de 100 pontos','muted small'));
+ const ring=el('div',undefined,'score '+(custom||sc.pass?'pass':'fail'));
+ ring.style.setProperty('--v',score);
+ const inner=el('div');inner.append(el('b',score.toLocaleString('pt-BR',{maximumFractionDigits:2})),el('span','de 100 pontos','muted small'));
  ring.append(inner);
  const info=el('div');
  const h=el('h2','Resultado do simulado');h.tabIndex=-1;
@@ -1014,14 +1133,19 @@ function openResult(){
  for(const [v,t] of [[sc.hits,'acertos'],[wrong,'erros'],[blank,'em branco'],[fmtTime(S.finishedAt-S.startedAt),'tempo']]){
   const d=el('div');d.append(el('b',v),el('span',t,'muted small'));stats.append(d);
  }
- info.append(h,el('p',sc.pass?'Atingiu os critérios mínimos da objetiva.':'Ficou abaixo dos critérios mínimos da objetiva.','verdict '+(sc.pass?'pass':'fail')),stats);
+ info.append(h);
+ if(custom) info.append(el('p','Simulado personalizado · '+S.questions.length+' questões','muted'));
+ else info.append(el('p',sc.pass?'Atingiu os critérios mínimos da objetiva.':'Ficou abaixo dos critérios mínimos da objetiva.','verdict '+(sc.pass?'pass':'fail')));
+ info.append(stats);
  top.append(ring,info);
 
  const bars=el('div',undefined,'bars');
- for(const b of ['p','g','e']){
-  const row=el('div',undefined,'bar-row '+b);
-  const bar=el('div',undefined,'bar');const fill=el('div');fill.style.width=(sc.totals[b]/quotas[b]*100)+'%';bar.append(fill);
-  row.append(el('span',shortLabels[b]),bar,el('b',sc.totals[b]+'/'+quotas[b]));
+ for(const [key,label] of Object.entries(groupLabels())){
+  const group=groups[key];
+  if(!group) continue;
+  const row=el('div',undefined,'bar-row '+(key==='p'||key==='e'?key:'g'));
+  const bar=el('div',undefined,'bar');const fill=el('div');fill.style.width=(group.hits/group.total*100)+'%';bar.append(fill);
+  row.append(el('span',label),bar,el('b',group.hits+'/'+group.total));
   bars.append(row);
  }
 
@@ -1060,6 +1184,7 @@ $('theme').addEventListener('click',()=>{
  applyTheme(next);store.set(THEME_KEY,next);
 });
 applyTheme(store.get(THEME_KEY));
+initFormats();
 
 // ---------- eventos ----------
 $('begin').addEventListener('click',begin);
