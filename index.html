@@ -562,6 +562,410 @@ if(typeof module!=='undefined') module.exports={...module.exports,draw,grade};
 
 
 
+const formalCases = new Map([
+ ["obra", [
+  "A Diretoria precisa pedir à Secretaria de Obras o cronograma físico-financeiro atualizado até 27 de novembro. O prazo é para receber o documento.",
+  "Solicitamos o envio do cronograma físico-financeiro atualizado da obra até 27 de novembro.",
+  "Solicitamos o cronograma físico-financeiro da obra com atualização prevista para 27 de novembro.",
+  "Solicitamos, até 27 de novembro, a atualização do cronograma físico-financeiro da obra.",
+  "Solicitamos o envio das medições realizadas na obra até 27 de novembro.",
+  "O pedido precisa indicar a entrega do cronograma já atualizado e vincular o prazo ao envio."
+ ]],
+ ["arquivo", [
+  "O setor precisa confirmar se a versão assinada do relatório está no arquivo. Ainda não há autorização para remessa.",
+  "Solicitamos que informe se a versão assinada do relatório consta do arquivo.",
+  "Solicitamos que encaminhe a versão assinada do relatório constante do arquivo.",
+  "Solicitamos confirmação da assinatura da versão que será arquivada.",
+  "Solicitamos que providencie o arquivamento da versão assinada do relatório.",
+  "O objetivo é confirmar a guarda de um documento específico. As outras alternativas solicitam remessa, assinatura ou arquivamento."
+ ]],
+ ["biblioteca", [
+  "A coordenação precisa do número de exemplares disponíveis para empréstimo. Os itens de consulta local devem ser excluídos da contagem.",
+  "Solicitamos o quantitativo de exemplares disponíveis para empréstimo, excluídos os de consulta local.",
+  "Solicitamos o inventário total dos exemplares, incluindo os destinados à consulta local.",
+  "Solicitamos o quantitativo de empréstimos realizados, excluídas as consultas locais.",
+  "Solicitamos o quantitativo de exemplares emprestados e ainda não devolvidos.",
+  "A unidade contada é o exemplar disponível para empréstimo."
+ ]],
+ ["plenário", [
+  "A Secretaria comunica que apenas a sessão de terça-feira mudou de local. Data e horário permanecem.",
+  "A sessão de terça-feira ocorrerá no Auditório B, na data e no horário originalmente informados.",
+  "As sessões de terça-feira passarão a ocorrer no Auditório B, no horário habitual.",
+  "A sessão de terça-feira ocorrerá no Auditório B, em data e horário a confirmar.",
+  "A sessão de terça-feira mantém o local e terá novo horário no Auditório B.",
+  "O aviso limita a mudança ao local de uma sessão e preserva os demais dados."
+ ]],
+ ["inventário", [
+  "Após encontrar divergências, o almoxarifado pede que o setor confirme os saldos físicos antes de qualquer ajuste no sistema.",
+  "Antes de ajustar o cadastro, solicitamos a conferência dos saldos físicos divergentes.",
+  "Solicitamos o ajuste dos saldos cadastrados para posterior conferência física.",
+  "Solicitamos que os saldos físicos sejam alinhados aos registros, dispensada a conferência.",
+  "Solicitamos a confirmação dos saldos do sistema antes de nova contagem física.",
+  "A conferência dos itens físicos deve preceder a alteração do cadastro."
+ ]],
+ ["agenda", [
+  "A Diretoria pretende confirmar o local da reunião e informar que o horário ainda depende de validação.",
+  "A reunião ocorrerá na Sala 2. O horário será informado após validação.",
+  "A reunião ocorrerá em horário validado. A sala será informada oportunamente.",
+  "O local e o horário da reunião serão confirmados após validação.",
+  "A reunião foi confirmada para a Sala 2 no horário originalmente proposto.",
+  "A sala está definida. A validação pendente se refere ao horário."
+ ]],
+ ["fotografia", [
+  "O organizador solicita autorização para publicar três imagens determinadas. O pedido não contempla reutilização futura.",
+  "Solicitamos autorização para publicar as três imagens anexas nesta divulgação.",
+  "Solicitamos autorização para publicar as imagens do evento em divulgações institucionais.",
+  "Comunicamos que as três imagens anexas já foram autorizadas para publicação.",
+  "Solicitamos autorização para registrar três imagens durante a próxima divulgação.",
+  "O pedido recai sobre a publicação atual das três imagens já identificadas."
+ ]],
+ ["malote", [
+  "O envio do malote foi adiado. O destinatário precisa informar se pode recebê-lo no próximo dia útil.",
+  "Em razão do adiamento, solicitamos que confirme a possibilidade de receber o malote no próximo dia útil.",
+  "Informamos que o recebimento do malote está confirmado para o próximo dia útil.",
+  "Solicitamos que confirme se o malote foi recebido no último dia útil.",
+  "Em razão do adiamento, solicitamos que confirme a coleta do malote no próximo dia útil.",
+  "A situação exige consultar a disponibilidade para recebimento futuro, sem tratá-la como confirmada."
+ ]],
+ ["inscrição", [
+  "O setor da banca comunica que recebeu o formulário, mas a inscrição ainda depende da análise dos documentos.",
+  "Confirmamos o recebimento do formulário. A inscrição permanece sujeita à análise documental.",
+  "Confirmamos a inscrição. Os documentos serão arquivados após análise.",
+  "A inscrição foi deferida, ficando pendente apenas o envio do formulário.",
+  "O formulário será recebido após o encerramento da análise da inscrição.",
+  "Recebimento do formulário e deferimento da inscrição são etapas distintas."
+ ]],
+ ["votação", [
+  "A Secretaria precisa informar que a discussão terminou, mas a votação ocorrerá na próxima sessão.",
+  "Encerrada a discussão, a votação da matéria ficou para a próxima sessão.",
+  "Encerrada a votação, a discussão será retomada na próxima sessão.",
+  "A deliberação foi concluída e será registrada na próxima sessão.",
+  "A apreciação foi adiada antes do início da discussão.",
+  "Somente a discussão terminou. A votação é futura."
+ ]],
+ ["jardim", [
+  "O aviso deve informar que a passagem lateral ficará fechada durante a manutenção, enquanto a entrada principal segue aberta.",
+  "Durante a manutenção, utilize a entrada principal. A passagem lateral ficará fechada.",
+  "Durante a manutenção, utilize a passagem lateral. A entrada principal ficará fechada.",
+  "A entrada principal e a passagem lateral permanecerão fechadas durante a manutenção.",
+  "A passagem lateral será fechada depois da manutenção, com a entrada principal aberta.",
+  "O aviso orienta o fluxo de acesso e delimita o período da restrição."
+ ]],
+ ["balcão", [
+  "A coordenação pede o número de pessoas atendidas, por turno, sem nomes nem números de documentos.",
+  "Solicitamos o total de atendimentos por turno, sem identificação pessoal.",
+  "Solicitamos a lista nominal de atendimentos, organizada por turno.",
+  "Solicitamos o total diário de atendimentos, com indicação dos documentos apresentados.",
+  "Solicitamos o total geral de atendimentos e os horários de funcionamento dos turnos.",
+  "O pedido exige dados agregados com recorte por turno."
+ ]],
+ ["mapa", [
+  "Um visitante pede orientação para chegar à portaria enquanto o acesso norte estiver interditado. O desvio usa a entrada sul.",
+  "Enquanto o acesso norte estiver interditado, dirija-se à portaria pela entrada sul.",
+  "Após a liberação do acesso norte, dirija-se à portaria pela entrada sul.",
+  "Dirija-se ao acesso norte para alcançar a portaria sul durante a interdição.",
+  "Durante a interdição da portaria, aguarde a abertura da entrada sul.",
+  "A condição se aplica ao acesso norte e a orientação vale durante a interdição."
+ ]],
+ ["auditório", [
+  "O evento continua confirmado. A equipe pede apenas confirmação de que o auditório estará disponível para montagem a partir das 8h.",
+  "Solicitamos a confirmação de disponibilidade do auditório para montagem a partir das 8h.",
+  "Solicitamos a confirmação da realização do evento a partir das 8h.",
+  "Solicitamos a liberação do auditório até as 8h para encerramento da montagem.",
+  "Confirmamos a disponibilidade para montagem e aguardamos confirmação do evento.",
+  "É a disponibilidade para a montagem a partir das 8h que precisa ser confirmada."
+ ]],
+ ["planilha", [
+  "O financeiro pede correção somente dos cabeçalhos vazios. Valores já validados devem ser preservados.",
+  "Solicitamos o preenchimento dos cabeçalhos vazios, preservados os valores já validados.",
+  "Solicitamos a revisão dos valores nas colunas que apresentam cabeçalho vazio.",
+  "Solicitamos a validação da planilha após a substituição de todas as colunas.",
+  "Solicitamos o preenchimento das células vazias, inclusive as destinadas aos valores.",
+  "A intervenção é restrita aos cabeçalhos faltantes."
+ ]],
+ ["correio", [
+  "O setor quer cópia dos comprovantes das cartas registradas efetivamente expedidas entre os dias 1º e 10.",
+  "Solicitamos cópia dos comprovantes das cartas registradas expedidas entre os dias 1º e 10.",
+  "Solicitamos as cartas registradas cujos comprovantes foram emitidos após o dia 10.",
+  "Solicitamos cópia dos comprovantes das cartas preparadas para expedição entre os dias 1º e 10.",
+  "Solicitamos a relação das cartas registradas recebidas entre os dias 1º e 10.",
+  "O período recai sobre a expedição efetiva, e o objeto do pedido é a cópia dos comprovantes."
+ ]],
+ ["estoque", [
+  "Um lote foi contado, mas ainda não foi etiquetado. A instrução é etiquetá-lo antes de liberar a saída.",
+  "Após a etiquetagem do lote já contado, poderá ser liberada sua saída.",
+  "Após a liberação da saída, encaminhe o lote já contado para etiquetagem.",
+  "Libere a saída dos itens contados e encaminhe somente os demais para etiquetagem.",
+  "Suspenda a contagem do lote até que os itens já liberados sejam etiquetados.",
+  "A contagem já ocorreu. A etiquetagem é condição para a saída."
+ ]],
+ ["transporte", [
+  "A linha está suspensa até o reparo e ainda não há data confirmada para retorno.",
+  "A linha permanece suspensa até a conclusão do reparo. A data de retorno será divulgada oportunamente.",
+  "A linha retomará a operação na data anteriormente anunciada, após a conclusão do reparo.",
+  "A suspensão termina na próxima data de manutenção, já confirmada para a linha.",
+  "A linha foi retomada enquanto se aguarda a confirmação do reparo.",
+  "O texto deve manter a suspensão e evitar anunciar data ainda indefinida."
+ ]],
+ ["entrevista", [
+  "O setor deseja registrar por escrito que o convidado permitiu gravar a entrevista apenas para transcrição interna.",
+  "Registramos a autorização para gravar a entrevista exclusivamente para fins de transcrição interna.",
+  "Registramos a autorização para divulgar internamente a gravação e a transcrição da entrevista.",
+  "Registramos a autorização para gravar a entrevista e publicar sua transcrição.",
+  "Solicitamos autorização para disponibilizar publicamente a gravação da entrevista.",
+  "A permissão cobre a gravação destinada à transcrição interna, sem autorizar divulgação."
+ ]],
+ ["amostra", [
+  "A pesquisadora orienta que a amostra separada seja mantida à parte até nova análise. As demais podem seguir o fluxo usual.",
+  "Mantenha a amostra separada até a nova análise. As demais seguem o fluxo usual.",
+  "Mantenha todas as amostras separadas até a nova análise.",
+  "Reúna a amostra separada às demais para que todas sigam o fluxo usual.",
+  "Encaminhe apenas as demais amostras para a nova análise e descarte a unidade separada.",
+  "A orientação distingue uma amostra das demais e estabelece prazo para a separação."
+ ]],
+ ["chave", [
+  "A chefia quer confirmar se as chaves antigas foram recolhidas após a troca da fechadura.",
+  "Solicitamos confirmação do recolhimento das chaves antigas após a troca da fechadura.",
+  "Solicitamos autorização para substituir a fechadura com as chaves antigas ainda em uso.",
+  "Solicitamos a confirmação de que as novas chaves serão recolhidas após a troca.",
+  "Solicitamos a devolução das chaves antigas antes de trocar a fechadura.",
+  "O pedido é de confirmação sobre recolhimento posterior à troca."
+ ]],
+ ["impressora", [
+  "A técnica informa que a impressora voltou a funcionar e pede chamado apenas se a falha voltar.",
+  "O equipamento voltou a funcionar. Se a falha reaparecer, abra um chamado técnico.",
+  "Mantenha o equipamento fora de uso até a abertura de novo chamado.",
+  "Foi aberto um novo chamado porque a falha reapareceu após o reparo.",
+  "Abra um chamado antes do uso, mesmo que o equipamento esteja funcionando.",
+  "O problema foi resolvido no momento, e novo pedido de suporte fica condicionado à reincidência."
+ ]],
+ ["conferência", [
+  "A organização reserva uma mesa exclusivamente para credenciamento, das 8h às 10h. Depois ela fica disponível para outros usos.",
+  "Das 8h às 10h, a mesa será de uso exclusivo do credenciamento. Após as 10h, poderá ser utilizada para outras finalidades.",
+  "A mesa estará disponível para uso geral das 8h às 10h e será reservada depois.",
+  "A mesa será de uso exclusivo do credenciamento durante toda a conferência.",
+  "Após as 10h, a mesa ficará reservada para credenciamento e uso geral simultaneamente.",
+  "O texto delimita a exclusividade ao intervalo informado."
+ ]],
+ ["prateleira", [
+  "A biblioteca pede que os livros raros sejam consultados na sala de leitura e devolvidos ao balcão, sem retirada externa.",
+  "A consulta aos livros raros será feita na sala de leitura. Ao final, devolva-os ao balcão.",
+  "Os livros raros podem ser retirados mediante registro no balcão e devolvidos à sala de leitura.",
+  "A consulta aos livros raros será feita no balcão, com devolução à sala de leitura.",
+  "Consulte os livros raros onde preferir e devolva-os à prateleira ao final.",
+  "A consulta é local, e o balcão é o ponto de devolução."
+ ]],
+ ["exposição", [
+  "A galeria avisa que apenas duas salas estarão fechadas para ajuste. As demais abrem no horário habitual.",
+  "Duas salas estão fechadas para ajustes. A visita às demais segue o horário habitual.",
+  "A galeria permanecerá fechada até que os ajustes nas duas salas terminem.",
+  "Duas salas funcionarão no horário habitual enquanto as demais aguardam ajuste.",
+  "O horário de visita de todas as salas será reduzido durante os ajustes.",
+  "A restrição é parcial e preserva o horário das salas restantes."
+ ]]
+]);
+const connectorCases = new Map([
+ ["arquivo", [
+  "O relatório original permaneceu no arquivo, conquanto a cópia digital fosse suficiente para a consulta.",
+  "Ainda que",
+  "De modo que",
+  "Na medida em que",
+  "Desde que",
+  "Conquanto introduz uma ressalva concessiva, assim como ainda que."
+ ]],
+ ["biblioteca", [
+  "A bibliotecária catalogou novamente o acervo, porquanto o sistema antigo havia perdido os registros.",
+  "Porque",
+  "Portanto",
+  "Conquanto",
+  "Contanto que",
+  "Porquanto apresenta o motivo da nova catalogação."
+ ]],
+ ["plenário", [
+  "Os vereadores discutiram o requerimento; o presidente, entretanto, adiou a votação.",
+  "Contudo",
+  "Por conseguinte",
+  "Porquanto",
+  "Nesse ínterim",
+  "Entretanto sinaliza oposição entre a discussão e o adiamento."
+ ]],
+ ["inventário", [
+  "Convém confrontar o saldo físico com o registro contábil, a fim de que as divergências sejam apuradas.",
+  "Para que",
+  "Logo que",
+  "À medida que",
+  "Visto que",
+  "A fim de que introduz a finalidade da comparação."
+ ]],
+ ["agenda", [
+  "A coordenação remarcaria a reunião, contanto que o auditório estivesse disponível.",
+  "Desde que",
+  "Embora",
+  "Assim que",
+  "Uma vez que",
+  "Contanto que estabelece uma condição."
+ ]],
+ ["fotografia", [
+  "A fotógrafa enviou os registros tão logo terminou a seleção das imagens.",
+  "Assim que",
+  "Mesmo que",
+  "Dado que",
+  "Para que",
+  "Tão logo indica que a primeira ação ocorreu imediatamente após a conclusão da segunda."
+ ]],
+ ["malote", [
+  "A equipe antecipou a coleta, visto que o fornecedor encerraria o expediente mais cedo.",
+  "Já que",
+  "Ainda que",
+  "Logo que",
+  "A menos que",
+  "Visto que introduz a causa ou justificativa da antecipação."
+ ]],
+ ["inscrição", [
+  "Não houve instabilidade no portal. Houve, todavia, atraso na análise documental.",
+  "Não obstante",
+  "Por isso",
+  "Em seguida",
+  "Por exemplo",
+  "Todavia introduz contraste entre o funcionamento do portal e a demora na análise."
+ ]],
+ ["votação", [
+  "A matéria foi retirada da pauta; por conseguinte, não foi submetida a voto naquele dia.",
+  "Consequentemente",
+  "Em contrapartida",
+  "De antemão",
+  "De outra forma",
+  "Por conseguinte liga a retirada à consequência descrita."
+ ]],
+ ["jardim", [
+  "Conforme previa o plano de manutenção, os canteiros foram irrigados no início da manhã.",
+  "De acordo com o que",
+  "Com a condição de que",
+  "Em razão de o plano prever",
+  "A despeito do que",
+  "Conforme expressa adequação ao que previa o plano."
+ ]],
+ ["balcão", [
+  "O atendimento foi reorganizado, haja vista o aumento da procura no turno da tarde.",
+  "Em razão do",
+  "A despeito do",
+  "Em substituição ao",
+  "Na hipótese de",
+  "Haja vista introduz a circunstância que justifica a reorganização."
+ ]],
+ ["mapa", [
+  "O visitante consultou o mapa à medida que avançava pelo trajeto.",
+  "À proporção que",
+  "Ao passo que deixou de",
+  "Logo depois que",
+  "Sempre que antes",
+  "À medida que estabelece progressão concomitante."
+ ]],
+ ["auditório", [
+  "Uma sala menor foi usada, não obstante o auditório principal já estivesse livre.",
+  "Ainda que",
+  "Na medida em que",
+  "Assim que",
+  "Contanto que",
+  "Não obstante introduz concessão. A disponibilidade poderia favorecer o auditório, mas a equipe usou outra sala."
+ ]],
+ ["planilha", [
+  "A planilha foi rejeitada por estar incompleta, e não por conter valores incorretos.",
+  "Por se encontrar incompleta",
+  "Ainda que se encontrasse incompleta",
+  "Para que se encontrasse incompleta",
+  "Desde que estivesse incompleta",
+  "A expressão introduz a causa da rejeição."
+ ]],
+ ["correio", [
+  "Antes que o malote saísse, a atendente inseriu o comprovante no envelope.",
+  "Sem que o malote ainda tivesse saído",
+  "Quando o malote já havia saído",
+  "Para impedir a saída do malote",
+  "Na hipótese de o malote não sair",
+  "A inserção ocorreu antes da saída, que ainda não havia acontecido naquele momento."
+ ]],
+ ["estoque", [
+  "Os lotes já estavam separados, de maneira que a conferência pôde começar imediatamente.",
+  "Por isso",
+  "Apesar disso",
+  "Até então",
+  "Em compensação",
+  "A separação dos lotes teve como consequência a possibilidade de iniciar a conferência."
+ ]],
+ ["transporte", [
+  "Se bem que a via já estivesse liberada, a linha dependia da autorização de retorno.",
+  "Embora",
+  "Quando",
+  "Já que",
+  "Desde que",
+  "Se bem que introduz concessão."
+ ]],
+ ["entrevista", [
+  "A jornalista confirmou a autorização antes de publicar o trecho, de modo a evitar o uso indevido da gravação.",
+  "Para evitar",
+  "Após evitar",
+  "Por ter evitado",
+  "Apesar de evitar",
+  "De modo a introduz o objetivo da confirmação prévia."
+ ]],
+ ["amostra", [
+  "Uma das amostras foi isolada, uma vez que apresentava alteração de cor.",
+  "Pois",
+  "Entretanto",
+  "Conforme",
+  "Mesmo que",
+  "A alteração de cor justifica o isolamento."
+ ]],
+ ["chave", [
+  "A porta não deve ser aberta, salvo se houver autorização expressa.",
+  "Exceto se",
+  "Desde que não",
+  "Como se",
+  "Ainda que",
+  "Salvo se introduz a condição que constitui exceção à restrição."
+ ]],
+ ["impressora", [
+  "A impressora voltou a operar; por ora, a equipe dispensou a abertura de chamado.",
+  "Por enquanto",
+  "De imediato e definitivamente",
+  "Em outro momento",
+  "Por esse motivo apenas",
+  "Por ora delimita a decisão ao momento atual."
+ ]],
+ ["conferência", [
+  "A mesa de credenciamento será liberada após as dez, a menos que a fila ainda esteja longa.",
+  "Exceto se",
+  "Assim que",
+  "Uma vez que",
+  "Mesmo se",
+  "A menos que introduz a hipótese de exceção."
+ ]],
+ ["prateleira", [
+  "Os volumes ficaram na vitrine, a despeito da ampliação do espaço na prateleira.",
+  "Apesar da",
+  "Em razão da",
+  "Durante a",
+  "Para fins de",
+  "A despeito da assinala uma circunstância contrária à situação verificada."
+ ]],
+ ["exposição", [
+  "Os ajustes da galeria foram concluídos. Doravante, a vistoria ocorrerá semanalmente.",
+  "De agora em diante",
+  "Até aquele momento",
+  "Na semana anterior",
+  "A qualquer momento no passado",
+  "Doravante marca a vigência da rotina a partir do momento de referência."
+ ]],
+ ["obra", [
+  "A equipe antecipou a vistoria, sem que isso implicasse a alteração do cronograma contratual.",
+  "Isso não acarretou alteração",
+  "Isso se fundamentou em alteração",
+  "Isso ocorreu somente após a alteração",
+  "Isso exigiu a autorização da alteração",
+  "Implicar tem sentido de acarretar e a expressão indica ausência dessa consequência."
+ ]]
+]);
 const expansionContexts = words(`
 arquivo|A equipe abriu o arquivo antes da reunião|O documento tinha duas páginas e foi arquivado após a conferência|A versão publicada era a segunda|duas páginas|arquivo
 biblioteca|A bibliotecária conferiu o catálogo antes da abertura|O manual estava disponível apenas para consulta local|O manual continuou na biblioteca|consulta local|catálogo
@@ -597,7 +1001,19 @@ for (const [label,start,detail,conclusion,phrase] of expansionContexts){
  put('Localização de informação',`Do trecho “${text}”, qual expressão foi efetivamente empregada?`,[phrase,'às vinte e duas horas','no exercício seguinte','uma autorização judicial'],'A expressão aparece na segunda frase.');
  put('Coesão',`Qual conector dá sentido de conclusão à última frase do relato sobre ${label}? “${text} ___, ${conclusion[0].toLowerCase()+conclusion.slice(1)}.”`,['Portanto','Contudo','Por exemplo','Aliás'],'“Portanto” apresenta uma conclusão fundamentada no trecho anterior.');
  put('Pontuação',`Na frase sobre ${label}, qual versão pontua corretamente a expressão inicial de confirmação?`,[`Sim, a equipe verificou os dados.`,`Sim a equipe, verificou os dados.`,`Sim a, equipe verificou os dados.`,`Sim a equipe verificou, os dados.`],'A vírgula separa o marcador inicial “sim”, sem separar sujeito, verbo e complemento.');
- put('Formação de palavras',`No comunicado sobre ${label}, lê-se “reavaliar o procedimento”. O prefixo re- indica o quê?`,['Repetição da ação','Negação da ação','Tempo anterior ao fato','Redução do objeto'],'Reavaliar significa avaliar novamente.');
+ const [passage,...equivalents]=connectorCases.get(label);
+ const lexicalNote=equivalents.pop();
+ const testReading={
+  arquivo:'conquanto', biblioteca:'porquanto', plenário:'entretanto', inventário:'a fim de que', agenda:'contanto que',
+  fotografia:'tão logo', malote:'visto que', inscrição:'todavia', votação:'por conseguinte', jardim:'Conforme',
+  balcão:'haja vista o', mapa:'à medida que', auditório:'não obstante', planilha:'por estar incompleta',
+  correio:'Antes que o malote saísse', estoque:'de maneira que', transporte:'Se bem que', entrevista:'de modo a evitar',
+  amostra:'uma vez que', chave:'salvo se', impressora:'por ora', conferência:'a menos que', prateleira:'a despeito da',
+  exposição:'Doravante', obra:'sem que isso implicasse a alteração'
+ };
+ add('p','Coesão e equivalência de sentido',family,
+  'Leia: “'+passage+'” Considerando a relação de sentido no contexto, qual alternativa equivale ao segmento “'+testReading[label]+'”?',
+  equivalents,lexicalNote);
  put('Classes de palavras',`Em “A equipe examinou cuidadosamente o registro sobre ${label}”, qual é o papel de “cuidadosamente”?`,['Advérbio de modo','Adjetivo qualificativo','Substantivo abstrato','Pronome relativo'],'O advérbio caracteriza o modo como o exame foi feito.');
  put('Oração relativa',`Em “O relato sobre ${label}, que foi publicado ontem, recebeu correções”, que tipo de oração é “que foi publicado ontem”?`,['Subordinada adjetiva explicativa','Subordinada adjetiva restritiva','Subordinada adverbial causal','Coordenada conclusiva'],'As vírgulas isolam uma informação explicativa sobre o relato.');
  put('Regência verbal',`Na norma-padrão, como se completa “A equipe assistiu ___ apresentação sobre ${label}”, no sentido de presenciar?`,['à','a','há','às'],'No sentido de presenciar, assistir rege a preposição a, que se funde com o artigo feminino.');
@@ -610,7 +1026,9 @@ for (const [label,start,detail,conclusion,phrase] of expansionContexts){
  put('Inferência',`No aviso sobre ${label}, “até a supervisora revisou os registros”. O que o uso de “até” sugere?`,['A participação da supervisora era menos esperada.','A supervisora foi a única pessoa a revisar.','A supervisora recusou a revisão.','A revisão foi cancelada.'],'O operador “até” inclui um caso apresentado como pouco esperado.');
  put('Discurso indireto',`A relatora afirmou: “Vou conferir o registro sobre ${label}.” Qual versão relata a fala no discurso indireto, ajustando o tempo verbal?`,[`A relatora afirmou que conferiria o registro sobre ${label}.`,`A relatora perguntou se conferira o registro sobre ${label}.`,`A relatora negou que conferiria o registro sobre ${label}.`,`A relatora ordenou que outros conferissem o registro sobre ${label}.`],'O discurso indireto conserva a afirmação e usa o futuro do pretérito para o futuro em relação ao passado.');
  put('Paralelismo',`Qual redação tem paralelismo sintático na lista de tarefas relativa a ${label}?`,['Reunir os dados, conferir os registros e divulgar a decisão.','Reunir os dados, conferência dos registros e a decisão divulgada.','A reunião dos dados, conferir os registros e decisão.','Dados reunidos, conferência dos registros e divulgar a decisão.'],'As três tarefas começam com verbos no infinitivo.');
- put('Registro formal',`Qual frase é mais adequada a um ofício que solicita informações sobre ${label}?`,['Solicitamos o encaminhamento das informações até sexta-feira.','Manda aí o que vocês têm até sexta.','Vê se dá um jeito nisso daí.','Tô esperando o retorno logo.'],'A primeira opção usa linguagem formal e especifica o pedido.');
+ const [scenario,...revisions]=formalCases.get(label);
+ const reasoning=revisions.pop();
+ add('p','Redação oficial · precisão e sentido',family,scenario+' Qual redação preserva as informações e atende à finalidade da comunicação?',revisions,reasoning,'redacao');
  put('Acentuação',`No material sobre ${label}, qual palavra é acentuada por ser proparoxítona?`,['público','também','papéis','saída'],'Pú-bli-co tem a antepenúltima sílaba tônica.');
  put('Classificação sintática',`Na expressão “o relato sobre ${label}”, qual é o núcleo do sintagma nominal?`,['relato',label,'sobre','o'],'“Relato” é o substantivo principal, modificado pela expressão introduzida por “sobre”.');
 }
@@ -663,7 +1081,7 @@ function addComparison(block,topic,left,right,group,wrongLeft,wrongRight){
  const pair=(a,b)=>'I. '+a+'  /  II. '+b;
  add(block,topic,group,
   `Associe cada situação ao instituto que melhor a caracteriza.\n\nI. ${left.example}.\nII. ${right.example}.`,
-  [pair(left.name,right.name),pair(right.name,left.name),pair(left.name,wrongRight.name),pair(wrongLeft.name,right.name)],
+  [pair(left.name,right.name),pair(wrongLeft.name,wrongRight.name),pair(left.name,wrongRight.name),pair(wrongLeft.name,right.name)],
   `I. ${left.name} — ${left.why.trim()}\nII. ${right.name} — ${right.why.trim()}`,
   left.source===right.source?left.source:'');
 }
@@ -768,20 +1186,21 @@ for(const [noun,plural,verb,verbPlural,subject,time] of drills){
  put('Estrutura da oração',`No período “${sentence}”, qual alternativa identifica corretamente o verbo da oração?`,[verb,object,subject,time],`“${verb}” indica a ação e está flexionado no pretérito.`);
  put('Modalização',`Compare “${sentence}” com “Talvez ${subject.toLowerCase()} tenha feito isso”. Que efeito “talvez” produz na segunda frase?`,['Reduz a certeza sobre o fato','Transforma o texto em ordem','Confirma a data do fato','Nega categoricamente o fato'],'O advérbio introduz uma possibilidade.');
 }
+
 const numberTasks=[
- ['Coordenadas e distância',n=>[`Um ponto desloca-se ${3*n} unidades para leste e ${4*n} unidades para norte. Qual é a distância em linha reta entre o início e o fim?`,5*n,[7*n,12*n,n],'Aplique Pitágoras aos deslocamentos perpendiculares.']],
- ['Volume e capacidade',n=>[`Uma caixa contém ${n} recipientes de 750 mL totalmente cheios. Quantos litros de líquido há na caixa?`,.75*n,[.075*n,7.5*n,n],'Multiplique o número de recipientes por 0,75 litro.']],
- ['Estatística · moda',n=>[`Observações: ${n+3}, ${n}, ${n+2}, ${n+3}, ${n+5}, ${n+3}, ${n+2}. Qual é a moda?`,n+3,[n,n+2,n+5],'A moda é o valor de maior frequência.']],
- ['Probabilidade conjunta',n=>[`Uma urna tem ${n} fichas azuis e ${n+1} amarelas. Retiram-se duas fichas sucessivas, sem reposição. Qual é a probabilidade de ambas serem azuis?`,`${n}/${2*n+1} × ${n-1}/${2*n}`,[`${n}/${2*n+1} × ${n}/${2*n+1}`,`${n}/${2*n+1} × ${n-1}/${2*n+1}`,`${n+1}/${2*n+1} × ${n}/${2*n}`],'Após sair uma azul, há uma azul a menos e uma ficha a menos no total.']],
- ['Sistema linear por substituição',n=>[`Dois números x e y satisfazem x = 2y e x + y = ${3*n}. Quanto vale y?`,n,[n*2,n*3,n-1],'Substitua x por 2y para obter 3y igual ao total.']],
- ['Escala',n=>[`Um mapa está na escala 1:50.000. Uma distância de ${n} cm no mapa corresponde a quantos quilômetros reais?`,n/2,[n,n*5,n/20],'Cada centímetro corresponde a 50.000 centímetros, ou meio quilômetro.']],
- ['Progressão aritmética · soma',n=>[`Os cinco primeiros valores de uma PA começam em ${n} e têm razão 2. Qual é a soma desses cinco valores?`,5*n+20,[5*n+10,5*n+8,5*n+40],'Some os cinco termos ou multiplique o termo central por cinco.']],
- ['Regra de três composta',n=>[`${n} pessoas analisam ${20*n} solicitações em 4 horas. Mantido o ritmo individual, quantas solicitações ${n+3} pessoas analisam em 6 horas?`,30*(n+3),[20*(n+3),30*n,40*(n+3)],'Cada pessoa analisa cinco solicitações por hora. Multiplique pela nova quantidade de pessoas e horas.']],
- ['Sequência numérica',n=>[`Observe a sequência ${n}, ${n+1}, ${n+4}, ${n+9}, ${n+16}. Mantendo o padrão de acrescentar quadrados sucessivos a ${n}, qual é o próximo valor?`,n+25,[n+20,n+24,n+36],'O próximo quadrado é 5² = 25.']],
- ['Contagem pelo produto',n=>[`Há ${n} modelos de capa, 3 cores e 4 acabamentos. Cada item combina um modelo, uma cor e um acabamento. Quantas combinações são possíveis?`,12*n,[7*n,4*n,3*n],'Multiplique as quantidades de escolhas independentes.']]
+ ['Coordenadas e distância',n=>[`Uma equipe parte do ponto A, percorre ${3*n} m para leste e ${4*n} m para norte até B. Para voltar, percorre a linha reta entre B e A e, em seguida, mais ${n} m. Qual a distância total percorrida, em metros?`,13*n,[12*n,15*n,8*n],'A ida mede sete vezes a unidade do problema. A volta em linha reta mede cinco vezes essa unidade por Pitágoras. Some ainda o trecho adicional.']],
+ ['Volume e capacidade',n=>[`Um depósito recebeu ${n*4} frascos de 750 mL. Um quarto foi separado para reserva. O restante será distribuído em embalagens de 1,5 L. Quantas embalagens completas poderão ser preenchidas?`,Math.floor(1.5*n),[2*n,3*n,Math.floor(.75*n)],'Restam três quartos dos frascos. Cada embalagem comporta o equivalente a dois frascos. Conte apenas embalagens completas.']],
+ ['Estatística · moda',n=>[`Os tempos de sete atendimentos foram ${n+3}, ${n}, ${n+2}, ${n+3}, ${n+5}, ${n+3} e ${n+2} minutos. Uma conferência mostrou que dois dos registros de ${n+3} minutos eram, na verdade, de ${n+5} minutos. Qual é a moda após a correção?`,n+5,[n+3,n+2,n],'Após corrigir os registros, o maior valor aparece três vezes. O segundo mais frequente aparece duas vezes.']],
+ ['Probabilidade conjunta',n=>[`Uma urna contém ${n} fichas azuis e ${n+1} amarelas. Em duas retiradas sem reposição, qual expressão representa a probabilidade de obter exatamente uma ficha azul?`,`2 × ${n}/${2*n+1} × ${n+1}/${2*n}`,[`${n}/${2*n+1} × ${n+1}/${2*n}`,`2 × ${n}/${2*n+1} × ${n+1}/${2*n+1}`,`2 × ${n}/${2*n+1} × ${n-1}/${2*n}`],'Some as sequências azul–amarela e amarela–azul. Elas têm a mesma probabilidade, e o total de fichas diminui na segunda retirada.']],
+ ['Sistema linear por substituição',n=>[`Um setor registrou ${5*n} atendimentos em dois dias. No segundo dia houve ${n} atendimentos a mais do que no primeiro. Quantos atendimentos seriam registrados no segundo dia se a demanda desse dia aumentasse em 20%?`,3.6*n,[3*n,2.4*n,4*n],'Com x atendimentos no primeiro dia, vale x + (x + n) = 5n. Logo, o segundo dia tem 3n. Multiplique por 1,2.']],
+ ['Escala',n=>[`Um mapa em escala 1:50.000 mostra um trajeto de ${n} cm. Uma interdição acrescenta 20% à distância real. Qual é, em quilômetros, o percurso após o desvio?`,.6*n,[.5*n,.4*n,.7*n],'Cada centímetro do mapa representa meio quilômetro. Aplique o fator 1,2 à distância convertida.']],
+ ['Progressão aritmética · soma',n=>[`Durante oito semanas, o número semanal de processos analisados formou uma PA de primeiro termo ${n} e razão 3. Qual a diferença entre o total das quatro últimas semanas e o das quatro primeiras?`,48,[12,36,84],'Cada termo das quatro últimas semanas supera o termo correspondente das quatro primeiras em quatro vezes a razão. Some as quatro diferenças.']],
+ ['Regra de três composta',n=>[`No primeiro dia, ${n} analistas processaram ${20*n} pedidos em 4 horas. No dia seguinte, a equipe passou para ${n+2} analistas e trabalhou 6 horas, mas a produtividade individual por hora caiu 10%. Quantos pedidos foram processados no segundo dia?`,27*(n+2),[30*(n+2),27*n,20*(n+2)],'Antes da queda, cada pessoa processava cinco pedidos por hora. A nova taxa é 4,5, multiplicada pela nova equipe e por seis horas.']],
+ ['Sequência numérica',n=>[`A sequência ${n}, ${n+1}, ${n+4}, ${n+9}, ${n+16} segue o padrão de somar os quadrados de inteiros consecutivos, a partir de zero, a uma mesma base. Qual é a soma dos dois termos seguintes?`,2*n+61,[2*n+50,2*n+41,2*n+72],'Os próximos acréscimos são 25 e 36. Some os dois novos termos, incluindo a base de cada um.']],
+ ['Contagem pelo produto',n=>[`Um catálogo oferece ${n} modelos de capa, 3 cores e 4 acabamentos. Uma das três cores é incompatível com exatamente dois acabamentos, qualquer que seja a capa. Quantas combinações válidas há?`,10*n,[12*n,8*n,6*n],'Para cada modelo há 12 pares cor–acabamento inicialmente. Exclua os dois pares incompatíveis.']]
 ];
 for(const [topic,make] of numberTasks) for(let n=31;n<51;n++){
- const [question,correct,wrong,why]=make(n);
+ const [question,correct,wrong,why]=make(topic==='Sistema linear por substituição'?n*5:n);
  add('g','Matemática · '+topic,topic,question,[correct,...wrong].map(v=>typeof v==='number'?formatNumber(v):v),why);
 }
 const codeTasks=[
