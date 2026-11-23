@@ -180,7 +180,7 @@ kbd{font:600 .75rem ui-monospace,monospace;border:1px solid var(--line);border-b
     <div class="block b-e"><strong>20</strong><span>Conhecimentos Específicos</span></div>
    </div>
    <div id="custom-controls" hidden>
-    <p class="muted small" id="custom-hint">Digite 0 para excluir uma matéria.</p>
+    <p class="muted small" id="custom-hint">Digite 0 para excluir uma matéria. O limite é de 100 questões no total.</p>
     <div id="quantities" class="quantities"></div>
     <p id="custom-total" class="custom-total" role="status"></p>
    </div>
@@ -481,6 +481,14 @@ Object.assign(adapted,{
 });
 if(typeof module!=='undefined') module.exports={bank,sources,labels};
 const quotas = {p:10,g:10,e:20};
+const maxQuestions = 100;
+const examPoints = 100;
+function questionWeight(total){
+ const value=examPoints/total;
+ const rounded=Math.round(value*10000)/10000;
+ const formatted=rounded.toLocaleString('pt-BR',{maximumFractionDigits:4});
+ return (rounded===value?'':'≈ ')+formatted+(value===1?' ponto':' pontos')+' por questão';
+}
 const subjects = {
  p: 'Língua Portuguesa',
  math: 'Matemática e Raciocínio Lógico',
@@ -501,6 +509,10 @@ function subjectPools(){
  return pools;
 }
 function drawCustom(counts,previous=[],random=Math.random){
+ const total=Object.keys(subjects).reduce((sum,key)=>sum+counts[key],0);
+ if(!Number.isSafeInteger(total)||total<1||total>maxQuestions){
+  throw RangeError('O simulado deve ter de 1 a '+maxQuestions+' questões');
+ }
  const pools=subjectPools();
  const previousIds=new Set(previous);
  return Object.keys(subjects).flatMap(key=>{
@@ -557,7 +569,7 @@ function grade(questions,answers){
  const totals={p:0,g:0,e:0};
  for(const q of questions) if(answers[q.id]===q.correct) totals[q.block]++;
  const hits=totals.p+totals.g+totals.e;
- return {totals,hits,points:hits*2.5,pass:hits>=20 && totals.p+totals.g>0 && totals.e>0};
+ return {totals,hits,points:questions.length?hits*examPoints/questions.length:0,pass:hits>=20 && totals.p+totals.g>0 && totals.e>0};
 }
 if(typeof module!=='undefined') module.exports={...module.exports,draw,grade};
 
@@ -1453,21 +1465,29 @@ const quantityInputs={};
 const groupFor=q=>S.format==='custom'?subjectOf(q):q.block;
 const groupLabels=()=>S.format==='custom'?subjects:shortLabels;
 function customCounts(){
- return Object.fromEntries(Object.entries(quantityInputs).map(([key,input])=>[key,input.value.trim()===''?0:input.valueAsNumber]));
+ return Object.fromEntries(Object.entries(quantityInputs).map(([key,input])=>{
+  const count=input.value.trim()===''&&!input.validity?.badInput?0:input.valueAsNumber;
+  return [key,count];
+ }));
 }
 function refreshFormat(){
  const custom=$('exam-format').value==='custom';
  $('fixed-blocks').hidden=custom;
  $('custom-controls').hidden=!custom;
  $('format-description').textContent=custom
-  ?'Escolha quantas questões quer de cada matéria. A nota é proporcional aos acertos.'
+  ?'Distribua até '+maxQuestions+' questões entre as matérias. Todas têm o mesmo peso e a prova vale '+examPoints+' pontos.'
   :'40 questões sorteadas do banco com alternativas embaralhadas · 2,5 pontos por questão.';
  const counts=customCounts();
  const total=Object.values(counts).reduce((sum,n)=>sum+n,0);
  const invalid=Object.entries(counts).some(([key,n])=>!Number.isSafeInteger(n)||n<0||n>Number(quantityInputs[key].max));
- $('custom-total').textContent=invalid?'Use apenas números inteiros dentro dos limites de cada matéria.':
-  total===0?'Escolha pelo menos uma questão.':'Total: '+total.toLocaleString('pt-BR')+(total===1?' questão':' questões');
- $('begin').disabled=custom&&(invalid||total===0);
+ const aboveLimit=total>maxQuestions;
+ const countLabel=total.toLocaleString('pt-BR')+(total===1?' questão':' questões');
+ let message='Escolha pelo menos uma questão.';
+ if(total>0) message='Total: '+countLabel+' · '+questionWeight(total);
+ if(aboveLimit) message='Total: '+countLabel+'. Reduza para no máximo '+maxQuestions+'.';
+ if(invalid) message='Digite quantidades inteiras dentro dos limites indicados.';
+ $('custom-total').textContent=message;
+ $('begin').disabled=custom&&(invalid||aboveLimit||total===0);
  return {custom,counts};
 }
 function initFormats(){
@@ -1479,11 +1499,11 @@ function initFormats(){
   input.type='number';
   input.inputMode='numeric';
   input.min='0';
-  input.max=String(pool.length);
+  input.max=String(Math.min(pool.length,maxQuestions));
   input.step='1';
   input.value=String(saved?.counts?.[key]??0);
   input.setAttribute('aria-describedby','custom-hint');
-  input.title='Máximo: '+pool.length;
+  input.title='Máximo nesta matéria: '+input.max;
   input.addEventListener('input',refreshFormat);
   label.append(input);
   $('quantities').append(label);
@@ -1637,7 +1657,7 @@ function render(){
  $('chip').textContent=groupLabels()[groupFor(q)];
  $('chip').className='chip '+q.block;
  $('topic').textContent=q.topic;
- $('qnum').textContent='Questão '+(S.cursor+1)+' de '+S.questions.length;
+ $('qnum').textContent='Questão '+(S.cursor+1)+' de '+S.questions.length+' · '+questionWeight(S.questions.length);
  renderQuestion(q);
  const mark=$('mark');
  mark.setAttribute('aria-pressed',String(isMarked(q)));
@@ -1752,7 +1772,7 @@ function openResult(){
  const sc=grade(S.questions,S.answers);
  const custom=S.format==='custom';
  const groups=scoreGroups(S.questions,S.answers,custom);
- const score=custom?sc.hits*100/S.questions.length:sc.points;
+ const score=sc.points;
  const blank=S.questions.filter(q=>!answered(q)).length;
  const wrong=S.questions.length-blank-sc.hits;
  const area=$('result');
@@ -1770,7 +1790,7 @@ function openResult(){
   const d=el('div');d.append(el('b',v),el('span',t,'muted small'));stats.append(d);
  }
  info.append(h);
- if(custom) info.append(el('p','Simulado personalizado · '+S.questions.length+' questões','muted'));
+ if(custom) info.append(el('p','Simulado personalizado · '+S.questions.length+(S.questions.length===1?' questão':' questões')+' · '+questionWeight(S.questions.length),'muted'));
  else info.append(el('p',sc.pass?'Atingiu os critérios mínimos da objetiva.':'Ficou abaixo dos critérios mínimos da objetiva.','verdict '+(sc.pass?'pass':'fail')));
  info.append(stats);
  top.append(ring,info);
