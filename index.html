@@ -5,45 +5,202 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Simulado | Secretário da Mesa Diretiva</title>
 <style>
-:root{color-scheme:light;--ink:#172c31;--muted:#435c5f;--paper:#f1f6f3;--line:#cbdad3;--green:#075947;--light:#e7f4ed;--white:#fff;--red:#9d283b}
-*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:1rem/1.55 system-ui,sans-serif}button,input{font:inherit}button{cursor:pointer}button:disabled{cursor:default;opacity:.45}a{color:var(--green);text-underline-offset:.15em}[hidden]{display:none!important}:focus-visible{outline:3px solid #a76200;outline-offset:3px}
-header{background:#102f31;color:var(--white);padding:2.8rem max(1.2rem,calc((100vw - 1100px)/2));border-bottom:5px solid #78ae93}header p{margin:.15rem 0;color:#cae3da}h1{font-size:clamp(1.8rem,5vw,3.2rem);line-height:1.08;margin:.35rem 0 .65rem;letter-spacing:-.045em}h2{font-size:1.35rem;margin:0 0 .7rem}main{width:min(1100px,calc(100% - 2.4rem));margin:1.4rem auto 3rem}.card{background:white;border:1px solid var(--line);border-radius:16px;padding:clamp(1rem,3vw,1.8rem);box-shadow:0 4px 20px #122c3010}.layout{display:grid;grid-template-columns:minmax(0,1fr) 280px;gap:1rem;align-items:start}.meta{color:var(--muted);font-size:.9rem}.metric{display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem;margin:1rem 0}.metric div{padding:.75rem;background:var(--light);border-radius:10px}.metric strong{display:block;font-size:1.35rem;color:var(--green)}.primary,.secondary{border-radius:9px;padding:.6rem .95rem;font-weight:650;border:1px solid var(--green)}.primary{background:var(--green);color:white}.secondary{background:white;color:var(--green)}.actions{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:1.05rem}.progress{width:100%;accent-color:var(--green)}.grid{display:grid;grid-template-columns:repeat(5,1fr);gap:.35rem}.grid button{border:1px solid var(--line);border-radius:6px;background:white;color:var(--ink);padding:.3rem}.grid button.done{background:var(--light);border-color:#87a895}.grid button.active{outline:2px solid var(--green);outline-offset:1px}.grid button.wrong{background:#fff1f2;color:var(--red)}.choice{display:flex;gap:.65rem;align-items:start;padding:.75rem;margin:.42rem 0;border:1px solid var(--line);border-radius:10px}.choice:has(input:checked),.choice.good{background:var(--light);border-color:#5f9679}.choice.bad{background:#fff1f2;border-color:#c67882}.choice input{margin:.32rem .12rem 0;accent-color:var(--green);flex:none}.choice span{overflow-wrap:anywhere}.note{border-left:4px solid #78ae93;padding:.65rem .85rem;background:#f1f8f4;margin-top:1rem}.note p{margin:.25rem 0}.summary{margin-bottom:1rem}.status{font-weight:700;color:var(--green)}.status.fail{color:var(--red)}details{margin-top:1rem}summary{cursor:pointer;font-weight:650}footer{margin-top:1.25rem}.question{white-space:pre-line}fieldset{border:0;padding:0;margin:0;min-inline-size:0}legend{padding:0}.hidden-label{position:absolute;clip-path:inset(50%);width:1px;height:1px;overflow:hidden}
-@media(max-width:735px){.layout{grid-template-columns:1fr}.grid{grid-template-columns:repeat(10,1fr)}.metric{grid-template-columns:1fr}.metric strong{display:inline;margin-right:.45rem}}
-@media(max-width:420px){.grid{grid-template-columns:repeat(8,1fr)}}
+:root{color-scheme:light;--bg:#eef3f1;--surface:#fff;--surface-2:#f4f8f6;--ink:#14272b;--muted:#52666a;--line:#d5e1dc;--brand:#0a5c49;--brand-ink:#fff;--brand-soft:#e2f1e9;--ok:#13795b;--ok-soft:#e0f4ea;--bad:#b42339;--bad-soft:#fdecef;--warn:#a65f00;--warn-soft:#fff3dc;--code:#0f2326;--code-ink:#e6f2ee;--shadow:0 1px 2px #0f2a2a14,0 10px 28px #0f2a2a0d;--p:#2f6fb3;--g:#8a5bb8;--e:#0a5c49;--top:#0f2e30;--top-line:#78ae93;--on-ok:#fff;--on-bad:#fff;--on-chip:#fff}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:dark;--bg:#1b1e23;--surface:#23272e;--surface-2:#2a2f37;--ink:#e7e9ec;--muted:#a3abb6;--line:#3a414b;--brand:#3ecf8e;--brand-ink:#0c2118;--brand-soft:#3ecf8e1f;--ok:#3ecf8e;--ok-soft:#3ecf8e1c;--bad:#f2768a;--bad-soft:#f2768a1f;--warn:#f5b54a;--warn-soft:#f5b54a1f;--code:#16191d;--code-ink:#e6e8eb;--shadow:0 1px 2px #0005,0 8px 24px #0003;--p:#6ea8f0;--g:#b28be6;--e:#3ecf8e;--top:#23272e;--top-line:#3ecf8e;--on-ok:#0c2118;--on-bad:#2b0d14;--on-chip:#12161b}}
+:root[data-theme="dark"]{color-scheme:dark;--bg:#1b1e23;--surface:#23272e;--surface-2:#2a2f37;--ink:#e7e9ec;--muted:#a3abb6;--line:#3a414b;--brand:#3ecf8e;--brand-ink:#0c2118;--brand-soft:#3ecf8e1f;--ok:#3ecf8e;--ok-soft:#3ecf8e1c;--bad:#f2768a;--bad-soft:#f2768a1f;--warn:#f5b54a;--warn-soft:#f5b54a1f;--code:#16191d;--code-ink:#e6e8eb;--shadow:0 1px 2px #0005,0 8px 24px #0003;--p:#6ea8f0;--g:#b28be6;--e:#3ecf8e;--top:#23272e;--top-line:#3ecf8e;--on-ok:#0c2118;--on-bad:#2b0d14;--on-chip:#12161b}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:1rem/1.6 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+button,input{font:inherit;color:inherit}button{cursor:pointer}button:disabled{cursor:not-allowed;opacity:.45}
+a{color:var(--brand);text-underline-offset:.15em}
+[hidden]{display:none!important}
+:focus-visible{outline:3px solid var(--warn);outline-offset:2px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.muted{color:var(--muted)}.small{font-size:.875rem}
+h1,h2,h3{line-height:1.2;margin:0}
+/* topo */
+.top{background:var(--top);color:#fff;border-bottom:4px solid var(--top-line)}
+.top-in{width:min(1180px,calc(100% - 32px));margin:auto;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 0}
+.eyebrow{margin:0;font-size:.8rem;color:#ffffffb8}
+.top h1{font-size:clamp(1.1rem,2.6vw,1.45rem);letter-spacing:-.02em}
+.top-tools{display:flex;align-items:center;gap:8px;flex:none}
+.timer{font-variant-numeric:tabular-nums;background:#ffffff1a;padding:4px 10px;border-radius:999px;font-size:.9rem}
+.icon-btn{border:1px solid #ffffff40;background:transparent;color:inherit;border-radius:10px;width:38px;height:38px;display:grid;place-items:center;font-size:1.05rem}
+.side .icon-btn{border-color:var(--line)}
+main{width:min(1180px,calc(100% - 32px));margin:20px auto 48px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:clamp(16px,3vw,28px)}
+/* botões */
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:.6rem 1rem;font-weight:600;min-height:44px;display:inline-flex;align-items:center;justify-content:center;gap:.4rem}
+.btn:hover:not(:disabled){border-color:var(--brand)}
+.btn.primary{background:var(--brand);border-color:var(--brand);color:var(--brand-ink)}
+.btn.ghost{background:transparent}
+.btn.sm{min-height:34px;padding:.3rem .7rem;font-size:.875rem}
+.btn.lg{padding:.8rem 1.4rem;font-size:1.05rem}
+.btn[aria-pressed="true"]{background:var(--warn-soft);border-color:var(--warn);color:var(--warn)}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px}
+/* início */
+.hero h2{font-size:1.5rem;margin-bottom:.35rem}.hero p{margin:.2rem 0}
+.blocks{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:20px 0}
+.block{border:1px solid var(--line);border-left:5px solid var(--c);border-radius:12px;padding:12px 14px;background:var(--surface-2)}
+.block strong{display:block;font-size:1.6rem;color:var(--c);line-height:1.1}
+.block span{font-size:.9rem;color:var(--muted)}
+.b-p{--c:var(--p)}.b-g{--c:var(--g)}.b-e{--c:var(--e)}
+.modes{border:0;padding:0;margin:0;display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.modes legend{font-weight:700;margin-bottom:8px}
+.mode{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);border-radius:12px;padding:12px 14px;cursor:pointer}
+.mode:has(input:checked){border-color:var(--brand);background:var(--brand-soft)}
+.mode input{margin-top:.35rem;accent-color:var(--brand)}
+.mode small{display:block;color:var(--muted)}
+.sources{margin-top:16px}.sources summary{cursor:pointer;font-weight:600}
+/* prova */
+.exam{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:20px;align-items:start}
+.qhead{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.qhead #mark{margin-left:auto}
+.chip{font-size:.78rem;font-weight:700;padding:3px 10px;border-radius:999px;color:var(--on-chip);background:var(--c)}
+.chip.p{--c:var(--p)}.chip.g{--c:var(--g)}.chip.e{--c:var(--e)}
+#qnum:focus,#result h2:focus{outline:none}
+#qnum{font-size:1rem;color:var(--muted);font-weight:600;margin-bottom:6px}
+.q-text{font-size:1.12rem;line-height:1.6;margin:0 0 12px;white-space:pre-line;overflow-wrap:anywhere}
+.q-cases{font-size:1rem;background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+pre.code{background:var(--code);color:var(--code-ink);border-radius:10px;padding:14px 16px;overflow-x:auto;font:.95rem/1.5 ui-monospace,SFMono-Regular,Consolas,monospace;margin:0 0 14px}
+fieldset{border:0;padding:0;margin:0;min-inline-size:0}
+.choices{display:grid;gap:10px;margin-top:6px}
+.choice{display:flex;gap:12px;align-items:flex-start;border:1.5px solid var(--line);border-radius:12px;padding:12px 14px;cursor:pointer;background:var(--surface);transition:border-color .12s,background .12s}
+.choice:hover{border-color:var(--brand)}
+.choice input{position:absolute;opacity:0;pointer-events:none}
+.choice .letter{flex:none;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-weight:700;border:1.5px solid var(--line);font-size:.9rem}
+.choice .txt{overflow-wrap:anywhere;padding-top:2px}
+.choice:has(input:checked){border-color:var(--brand);background:var(--brand-soft)}
+.choice:has(input:checked) .letter{background:var(--brand);border-color:var(--brand);color:var(--brand-ink)}
+.choice:has(input:focus-visible){outline:3px solid var(--warn);outline-offset:2px}
+.choice.locked{cursor:default}.choice.locked:hover{border-color:var(--line)}
+.choice.locked.good{border-color:var(--ok);background:var(--ok-soft)}.choice.locked.good .letter{background:var(--ok);border-color:var(--ok);color:var(--on-ok)}
+.choice.locked.bad{border-color:var(--bad);background:var(--bad-soft)}.choice.locked.bad .letter{background:var(--bad);border-color:var(--bad);color:var(--on-bad)}
+.tag{display:inline-block;margin-left:6px;font-size:.75rem;font-weight:700;padding:1px 8px;border-radius:999px}
+.tag.ok{background:var(--ok);color:var(--on-ok)}.tag.you{background:var(--surface-2);border:1px solid var(--line)}
+.feedback{margin-top:16px;border-radius:12px;padding:14px 16px;border-left:5px solid var(--c);background:var(--surface-2)}
+.feedback.right{--c:var(--ok)}.feedback.wrong{--c:var(--bad)}.feedback.blank{--c:var(--warn)}
+.feedback strong{color:var(--c)}.feedback p{margin:.35rem 0;white-space:pre-line}
+.qnav{display:flex;align-items:center;gap:10px;margin-top:22px;padding-top:16px;border-top:1px solid var(--line)}
+.qnav .kbd-hint{flex:1;text-align:center}
+kbd{font:600 .75rem ui-monospace,monospace;border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;padding:0 5px;background:var(--surface-2)}
+/* cartão */
+.side{position:sticky;top:16px;max-height:calc(100vh - 32px);overflow:auto}
+.side-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.side h2{font-size:1.1rem}
+.meter{height:8px;background:var(--surface-2);border:1px solid var(--line);border-radius:999px;overflow:hidden}
+#meter-fill{height:100%;width:0;background:var(--brand);transition:width .2s}
+#progress-text{margin:6px 0 10px}
+.filters{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.filters button{border:1px solid var(--line);background:transparent;border-radius:999px;padding:3px 10px;font-size:.8rem;min-height:30px}
+.filters button[aria-pressed="true"]{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+.navgroup{margin-bottom:12px}
+.navgroup h3{font-size:.78rem;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin-bottom:6px;display:flex;align-items:center;gap:6px}
+.navgroup h3::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--c)}
+.navgroup.p{--c:var(--p)}.navgroup.g{--c:var(--g)}.navgroup.e{--c:var(--e)}
+.grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.grid button{position:relative;border:1px solid var(--line);background:var(--surface);border-radius:8px;min-height:38px;font-size:.875rem;font-variant-numeric:tabular-nums}
+.grid button.done{background:var(--brand-soft);border-color:var(--brand)}
+.grid button.right{background:var(--ok-soft);border-color:var(--ok);color:var(--ok)}
+.grid button.wrong{background:var(--bad-soft);border-color:var(--bad);color:var(--bad)}
+.grid button.blank-r{background:var(--warn-soft);border-color:var(--warn);color:var(--warn)}
+.grid button.current{outline:2.5px solid var(--ink);outline-offset:1px;font-weight:700}
+.grid button.marked::after{content:"";position:absolute;top:3px;right:3px;width:7px;height:7px;border-radius:50%;background:var(--warn)}
+.grid button.dim{opacity:.25}
+.legend{display:flex;flex-wrap:wrap;gap:4px 12px;margin:6px 0 14px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:4px;vertical-align:-1px;border:1px solid var(--line)}
+.side-actions{display:grid;gap:8px}
+/* resultado */
+.res-top{display:grid;grid-template-columns:auto 1fr;gap:24px;align-items:center}
+.score{width:150px;height:150px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(var(--c) calc(var(--v)*1%),var(--surface-2) 0);position:relative}
+.score::before{content:"";position:absolute;inset:14px;border-radius:50%;background:var(--surface)}
+.score div{position:relative;text-align:center;line-height:1.1}.score b{font-size:2.1rem;display:block}
+.score.pass{--c:var(--ok)}.score.fail{--c:var(--bad)}
+.verdict{font-weight:700;font-size:1.15rem}.verdict.pass{color:var(--ok)}.verdict.fail{color:var(--bad)}
+.stats{display:flex;gap:18px;flex-wrap:wrap;margin:8px 0}
+.stats b{font-size:1.25rem;display:block}
+.bars{display:grid;gap:12px;margin:24px 0}
+.bar-row{display:grid;grid-template-columns:150px 1fr 60px;gap:12px;align-items:center}
+.bar{height:12px;border-radius:999px;background:var(--surface-2);border:1px solid var(--line);overflow:hidden}
+.bar div{height:100%;background:var(--c)}
+.bar-row.p{--c:var(--p)}.bar-row.g{--c:var(--g)}.bar-row.e{--c:var(--e)}
+.topics{list-style:none;padding:0;margin:8px 0 0;display:grid;gap:6px}
+.topics li{display:flex;justify-content:space-between;gap:12px;padding:8px 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface-2);font-size:.92rem}
+.topics li b{color:var(--bad);flex:none}
+.res-section{margin-top:22px}.res-section h3{font-size:1rem;margin-bottom:6px}
+/* mobile */
+.only-mobile{display:none!important}
+.backdrop{position:fixed;inset:0;background:#0008;z-index:20}
+@media (max-width:860px){
+ .exam{grid-template-columns:1fr}
+ .only-mobile{display:flex!important}
+ .side{position:fixed;left:0;right:0;bottom:0;top:auto;z-index:30;max-height:82vh;border-radius:18px 18px 0 0;transform:translateY(105%);transition:transform .2s;box-shadow:0 -10px 30px #0004}
+ .side.open{transform:none}
+ .bottombar{position:fixed;left:0;right:0;bottom:0;z-index:10;gap:8px;padding:10px 16px calc(10px + env(safe-area-inset-bottom));background:var(--surface);border-top:1px solid var(--line)}
+ .bottombar .btn{flex:1}
+ .exam-on main{padding-bottom:72px}
+ .qnav .kbd-hint{display:none}
+ .grid{grid-template-columns:repeat(10,1fr)}
+ .blocks,.modes{grid-template-columns:1fr}
+ .res-top{grid-template-columns:1fr;justify-items:center;text-align:center}
+ .stats{justify-content:center}
+ .bar-row{grid-template-columns:100px 1fr 48px}
+}
+@media (max-width:420px){.grid{grid-template-columns:repeat(8,1fr)}.q-text{font-size:1.04rem}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
 <body>
-<header><p>Câmara Municipal de Quatro Barras · Edital 001/2026</p><h1>Simulado para Secretário da Mesa Diretiva</h1><p>40 questões por tentativa · 2,5 pontos por questão</p></header>
+<header class="top"><div class="top-in">
+ <div><p class="eyebrow">Câmara Municipal de Quatro Barras · Edital 001/2026</p><h1>Simulado · Secretário da Mesa Diretiva</h1></div>
+ <div class="top-tools"><span id="timer" class="timer" title="Tempo decorrido" hidden>00:00:00</span><button id="theme" class="icon-btn" type="button" aria-label="Alternar tema claro/escuro">◐</button></div>
+</div></header>
 <main>
- <section id="start" class="card">
-  <h2>Gerar simulado</h2>
-  <p>Em cada tentativa, o sistema sorteia as questões e embaralha as quatro alternativas. O gabarito comentado aparece depois da entrega.</p>
-  <div class="metric"><div><strong>10</strong> Língua Portuguesa</div><div><strong>10</strong> Matemática e Raciocínio Lógico, Informática, Direito Administrativo e Constitucional</div><div><strong>20</strong> Conhecimentos Específicos</div></div>
-  <button class="primary" id="begin">Iniciar simulado</button>
-  <p class="meta" id="bank-info"></p>
+ <section id="start">
+  <div class="card hero">
+   <h2>Monte sua tentativa</h2>
+   <p class="muted">40 questões sorteadas do banco com alternativas embaralhadas · 2,5 pontos por questão.</p>
+   <div class="blocks">
+    <div class="block b-p"><strong>10</strong><span>Língua Portuguesa</span></div>
+    <div class="block b-g"><strong>10</strong><span>Matemática e Raciocínio Lógico, Informática, Direito Administrativo e Constitucional</span></div>
+    <div class="block b-e"><strong>20</strong><span>Conhecimentos Específicos</span></div>
+   </div>
+   <fieldset class="modes"><legend>Modo</legend>
+    <label class="mode"><input type="radio" name="mode" value="prova" checked><span><b>Prova</b><small>Gabarito só depois da entrega, como no dia.</small></span></label>
+    <label class="mode"><input type="radio" name="mode" value="estudo"><span><b>Estudo</b><small>Correção e justificativa logo após cada resposta.</small></span></label>
+   </fieldset>
+   <div class="actions"><button class="btn primary lg" id="begin" type="button">Iniciar simulado</button><button class="btn lg" id="resume" type="button" hidden></button></div>
+   <p class="muted small" id="bank-info"></p>
+  </div>
+  <details class="card sources"><summary>Banco e fontes</summary><p class="small">O banco reúne questões inéditas, incluindo variações de exercícios e comparações de casos, além de adaptações identificadas dos cadernos de Pindorama/SP de 2026. O material foi organizado pelo Anexo III do edital. O edital fixa 10 questões para o bloco combinado, sem cotas por disciplina dentro dele.</p><ul id="links" class="small"></ul></details>
  </section>
- <section id="result" class="card summary" aria-live="polite" hidden></section>
- <section id="exam" class="layout" hidden>
+
+ <section id="exam" class="exam" hidden>
   <article class="card">
-   <p id="topic" class="meta"></p>
-   <h2 id="question" class="question" tabindex="-1"></h2>
-   <fieldset><legend class="hidden-label">Alternativas</legend><div id="choices"></div></fieldset>
-   <div class="note" id="feedback" hidden></div>
-   <div class="actions"><button class="secondary" id="back">Anterior</button><button class="primary" id="next">Próxima</button></div>
+   <div class="qhead"><span id="chip" class="chip"></span><span id="topic" class="muted small"></span><button id="mark" class="btn ghost sm" type="button" aria-pressed="false">⚑ Marcar p/ revisar</button></div>
+   <h2 id="qnum" tabindex="-1"></h2>
+   <div id="question"></div>
+   <fieldset><legend class="sr">Alternativas</legend><div id="choices" class="choices"></div></fieldset>
+   <div id="feedback" class="feedback" aria-live="polite" hidden></div>
+   <div class="qnav"><button class="btn" id="back" type="button">← Anterior</button><span class="muted small kbd-hint"><kbd>A</kbd>–<kbd>D</kbd> responder · <kbd>←</kbd><kbd>→</kbd> navegar · <kbd>M</kbd> marcar</span><button class="btn primary" id="next" type="button">Próxima →</button></div>
   </article>
-  <aside class="card">
-   <h2>Cartão-resposta</h2>
-   <p id="progress-text" class="meta" aria-live="polite"></p>
-   <progress id="progress" class="progress" aria-label="Questões respondidas" max="40" value="0"></progress>
-   <div id="navigator" class="grid" aria-label="Navegar pelas questões"></div>
-   <div class="actions"><button class="primary" id="submit">Entregar simulado</button><button class="secondary" id="restart">Novo simulado</button></div>
+  <aside id="side" class="card side" aria-label="Cartão-resposta">
+   <div class="side-head"><h2>Cartão-resposta</h2><button class="icon-btn only-mobile" id="close-side" type="button" aria-label="Fechar cartão">✕</button></div>
+   <div class="meter" aria-hidden="true"><div id="meter-fill"></div></div>
+   <p id="progress-text" class="muted small" aria-live="polite"></p>
+   <div id="filters" class="filters" role="group" aria-label="Filtrar questões"></div>
+   <div id="navigator"></div>
+   <div id="legend" class="legend small muted"></div>
+   <div class="side-actions"><button class="btn primary" id="submit" type="button">Entregar simulado</button><button class="btn" id="show-result" type="button" hidden>Ver resultado</button><button class="btn ghost" id="restart" type="button">Novo simulado</button></div>
   </aside>
+  <div class="bottombar only-mobile"><button class="btn" id="m-back" type="button" aria-label="Questão anterior">←</button><button class="btn" id="m-card" type="button">Cartão</button><button class="btn primary" id="m-next" type="button" aria-label="Próxima questão">→</button></div>
  </section>
- <footer class="meta"><details><summary>Banco e fontes</summary><p>O banco reúne questões inéditas, incluindo variações de exercícios e comparações de casos, além de adaptações identificadas dos cadernos de Pindorama/SP de 2026. O material foi organizado pelo Anexo III do edital. O edital fixa 10 questões para o bloco combinado, sem cotas por disciplina dentro dele.</p><ul id="links"></ul></details></footer>
+ <div id="backdrop" class="backdrop" hidden></div>
+
+ <section id="result" class="card" hidden aria-live="polite"></section>
 </main>
 <noscript>Ative o JavaScript no navegador para usar o simulado.</noscript>
 <script>
-
 const bank = [];
 const sources = {
  edital: 'https://www.consulpam.com.br/index.php?menu=concursos&acao=ver&id=887',
@@ -602,123 +759,338 @@ for(const q of bank){
  q.question='Em '+q.topic+', qual associação entre conceito e definição está correta? Conceitos em análise: '+terms.join(', ')+'.';
 }
 
+// ===== Interface (banco, draw e grade vêm de src/bank.part.js) =====
 const $=id=>document.getElementById(id);
-let questions=[];
-let answers={};
-let cursor=0;
-let submitted=false;
-function element(tag,content,className){
- const node=document.createElement(tag);
- if(content!==undefined) node.textContent=content;
- if(className) node.className=className;
- return node;
+const KEY='simulado4b:tentativa:v1';
+const THEME_KEY='simulado4b:tema';
+const shortLabels={p:'Português',g:'Gerais',e:'Específicos'};
+const store={
+ get(k){try{return JSON.parse(localStorage.getItem(k))}catch{return null}},
+ set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch{}}
+};
+let S=null;
+let ticker=null;
+
+function el(tag,text,className){
+ const n=document.createElement(tag);
+ if(text!==undefined&&text!==null) n.textContent=text;
+ if(className) n.className=className;
+ return n;
 }
 function link(title,key){
- const node=element('a',title);
- node.href=sources[key];
- node.target='_blank';
- node.rel='noopener noreferrer';
- return node;
+ const a=el('a',title);a.href=sources[key];a.target='_blank';a.rel='noopener noreferrer';return a;
 }
-function go(index){
- cursor=index;
+const save=()=>store.set(KEY,S);
+const cur=()=>S.questions[S.cursor];
+const answered=q=>Object.hasOwn(S.answers,q.id);
+const locked=q=>S.submitted||(S.mode==='estudo'&&answered(q));
+const outcome=q=>!answered(q)?'blank':S.answers[q.id]===q.correct?'right':'wrong';
+const isMarked=q=>S.marked.includes(q.id);
+const fmtTime=ms=>{const s=Math.max(0,Math.floor(ms/1000));return [s/3600,s/60%60,s%60].map(v=>String(Math.floor(v)).padStart(2,'0')).join(':')};
+
+// ---------- telas ----------
+function show(screen){
+ for(const id of ['start','exam','result']) $(id).hidden=id!==screen;
+ document.body.classList.toggle('exam-on',screen==='exam');
+ $('timer').hidden=!S||screen==='start';
+ closeSide();
+ window.scrollTo({top:0});
+}
+function startTicker(){
+ clearInterval(ticker);
+ const upd=()=>{if(S) $('timer').textContent=fmtTime((S.finishedAt||Date.now())-S.startedAt)};
+ upd();
+ if(!S.finishedAt) ticker=setInterval(upd,1000);
+}
+
+// ---------- início ----------
+function refreshStart(){
+ const saved=store.get(KEY);
+ const btn=$('resume');
+ if(saved?.questions?.length){
+  const n=Object.keys(saved.answers||{}).length;
+  btn.textContent=saved.submitted?'Ver último resultado':'Continuar tentativa · '+n+'/'+saved.questions.length+' respondidas';
+  btn.hidden=false;
+ } else btn.hidden=true;
+}
+function begin(){
+ const saved=store.get(KEY);
+ if(saved&&!saved.submitted&&Object.keys(saved.answers||{}).length&&
+    !confirm('Há uma tentativa em andamento. Descartá-la e gerar outro simulado?')) return;
+ const mode=document.querySelector('input[name=mode]:checked').value;
+ S={questions:draw(saved?.questions?.map(q=>q.id)||[]),answers:{},marked:[],cursor:0,submitted:false,mode,startedAt:Date.now(),finishedAt:null,filter:'all'};
+ save();
+ openExam(0);
+}
+function resume(){
+ S=store.get(KEY);
+ if(!S) return refreshStart();
+ S.marked??=[];S.filter??='all';
+ startTicker();
+ if(S.submitted) openResult(); else openExam(S.cursor||0);
+}
+
+// ---------- prova ----------
+function openExam(index){
+ show('exam');
+ startTicker();
+ go(index,false);
+}
+function go(index,focus=true){
+ S.cursor=Math.max(0,Math.min(S.questions.length-1,index));
+ save();
  render();
- $('question').focus();
+ closeSide();
+ if(focus){$('qnum').focus({preventScroll:true});window.scrollTo({top:0,behavior:'smooth'})}
 }
-function start(){
- if(questions.length && !submitted && Object.keys(answers).length &&
-    !window.confirm('Descartar esta tentativa e gerar outro simulado?')) return;
- questions=draw(questions.map(q=>q.id));
- answers={};
- submitted=false;
- $('result').hidden=true;
- $('start').hidden=true;
- $('exam').hidden=false;
- go(0);
+function matches(i){
+ const q=S.questions[i];
+ switch(S.filter){
+  case 'marked':return isMarked(q);
+  case 'blank':return !answered(q);
+  case 'wrong':return outcome(q)!=='right'&&locked(q);
+  default:return true;
+ }
+}
+function neighbor(dir){
+ for(let i=S.cursor+dir;i>=0&&i<S.questions.length;i+=dir) if(matches(i)) return i;
+ return -1;
+}
+function step(dir){
+ const i=neighbor(dir);
+ if(i>-1) go(i);
+ else if(dir>0&&!S.submitted) submit();
+}
+function choose(index){
+ const q=cur();
+ if(locked(q)||!q.options[index]) return;
+ S.answers[q.id]=q.options[index];
+ save();
+ render();
+ const input=$('choices').querySelectorAll('input')[index];
+ input?.focus({preventScroll:true});
+}
+function toggleMark(){
+ const q=cur();
+ S.marked=isMarked(q)?S.marked.filter(id=>id!==q.id):[...S.marked,q.id];
+ save();
+ render();
+}
+function renderQuestion(q){
+ const box=$('question');
+ box.replaceChildren();
+ const cut=q.question.indexOf('\n\n');
+ if(cut<0){box.append(el('p',q.question,'q-text'));return}
+ box.append(el('p',q.question.slice(0,cut),'q-text'));
+ const rest=q.question.slice(cut+2);
+ if(/Python|JavaScript/.test(q.topic)){
+  const pre=el('pre',undefined,'code');pre.append(el('code',rest));box.append(pre);
+ } else box.append(el('p',rest,'q-text q-cases'));
 }
 function render(){
- const q=questions[cursor];
- const response=answers[q.id];
- $('topic').textContent='Questão '+(cursor+1)+' de '+questions.length+' · '+labels[q.block]+' · '+q.topic;
- $('question').textContent=q.question;
- const choices=q.options.map((option,index)=>{
-  const label=element('label',undefined,'choice');
-  const input=element('input');
-  input.type='radio';
-  input.name='option';
-  input.value=option;
-  input.checked=response===option;
-  input.disabled=submitted;
-  input.addEventListener('change',()=>{
-   answers[q.id]=option;
-   updateProgress();
-  });
-  if(submitted && option===q.correct) label.classList.add('good');
-  else if(submitted && option===response) label.classList.add('bad');
-  label.append(input,element('span','ABCD'[index]+'. '+option+
-   (submitted && option===q.correct?' ✓ Correta':'')+
-   (submitted && option===response?' · Sua resposta':'')));
+ const q=cur();
+ const response=S.answers[q.id];
+ const lock=locked(q);
+ $('chip').textContent=shortLabels[q.block];
+ $('chip').className='chip '+q.block;
+ $('topic').textContent=q.topic;
+ $('qnum').textContent='Questão '+(S.cursor+1)+' de '+S.questions.length;
+ renderQuestion(q);
+ const mark=$('mark');
+ mark.setAttribute('aria-pressed',String(isMarked(q)));
+ mark.textContent=isMarked(q)?'⚑ Marcada':'⚑ Marcar p/ revisar';
+ mark.hidden=S.submitted;
+
+ $('choices').replaceChildren(...q.options.map((option,i)=>{
+  const label=el('label',undefined,'choice');
+  const input=el('input');
+  input.type='radio';input.name='opt';input.value=String(i);
+  input.checked=response===option;input.disabled=lock;
+  input.addEventListener('change',()=>choose(i));
+  const txt=el('span',option,'txt');
+  if(lock){
+   label.classList.add('locked');
+   if(option===q.correct){label.classList.add('good');txt.append(el('span','Correta','tag ok'))}
+   else if(option===response) label.classList.add('bad');
+   if(option===response) txt.append(el('span','Sua resposta','tag you'));
+  }
+  label.append(input,el('span','ABCD'[i],'letter'),txt);
   return label;
- });
- $('choices').replaceChildren(...choices);
- $('feedback').hidden=!submitted;
- if(submitted){
-  const feedback=$('feedback');
-  feedback.replaceChildren(
-   element('strong',response===q.correct?'Acertou':response===undefined?'Em branco':'Errou'),
-   element('p',q.explanation),element('p',q.origin,'meta'));
-  if(q.source) feedback.append(link(q.origin.startsWith('Adaptada')?'Caderno da prova de origem':'Consultar fonte',q.source));
- }
- $('back').disabled=cursor===0;
- $('next').disabled=cursor===questions.length-1;
- $('submit').hidden=submitted;
- updateProgress();
-}
-function updateProgress(){
- const count=Object.keys(answers).length;
- $('progress').value=count;
- $('progress-text').textContent=count+' de '+questions.length+' respondidas'+(submitted?' · Revisão':'');
- $('navigator').replaceChildren(...questions.map((q,index)=>{
-  const marked=Object.hasOwn(answers,q.id);
-  const button=element('button',index+1);
-  button.classList.toggle('active',index===cursor);
-  button.classList.toggle('done',marked);
-  button.classList.toggle('wrong',submitted && answers[q.id]!==q.correct);
-  button.setAttribute('aria-label','Questão '+(index+1)+(submitted?(answers[q.id]===q.correct?', correta':marked?', incorreta':', em branco'):marked?', respondida':', em branco'));
-  if(index===cursor) button.setAttribute('aria-current','true');
-  button.addEventListener('click',()=>go(index));
-  return button;
  }));
+
+ const fb=$('feedback');
+ fb.hidden=!lock;
+ if(lock){
+  const o=outcome(q);
+  fb.className='feedback '+o;
+  fb.replaceChildren(el('strong',{right:'✓ Acertou',wrong:'✗ Errou',blank:'○ Em branco'}[o]),el('p',q.explanation),el('p',q.origin,'muted small'));
+  if(q.source) fb.append(link(q.origin.startsWith('Adaptada')?'Caderno da prova de origem':'Consultar fonte',q.source));
+ }
+
+ const prev=neighbor(-1),next=neighbor(1);
+ $('back').disabled=$('m-back').disabled=prev<0;
+ const nextLabel=next>-1?'Próxima →':S.submitted?'Fim':'Revisar e entregar';
+ $('next').textContent=nextLabel;
+ $('next').disabled=$('m-next').disabled=next<0&&S.submitted;
+ renderSide();
 }
+function renderSide(){
+ const total=S.questions.length;
+ const count=Object.keys(S.answers).length;
+ $('meter-fill').style.width=(count/total*100)+'%';
+ $('progress-text').textContent=count+' de '+total+' respondidas'+(S.marked.length?' · '+S.marked.length+' marcadas':'')+(S.submitted?' · revisão':'');
+ $('m-card').textContent='▦ '+count+'/'+total;
+ $('m-card').setAttribute('aria-label','Abrir cartão-resposta, '+count+' de '+total+' respondidas');
+ $('submit').hidden=S.submitted;
+ $('show-result').hidden=!S.submitted;
+
+ const filters=[['all','Todas'],['blank','Em branco'],['marked','Marcadas']];
+ if(S.submitted||S.mode==='estudo') filters.push(['wrong',S.submitted?'Erradas e brancas':'Erradas']);
+ $('filters').replaceChildren(...filters.map(([key,text])=>{
+  const b=el('button',text);b.type='button';
+  b.setAttribute('aria-pressed',String(S.filter===key));
+  b.addEventListener('click',()=>{S.filter=key;save();render()});
+  return b;
+ }));
+
+ const groups=['p','g','e'].map(block=>{
+  const wrap=el('div',undefined,'navgroup '+block);
+  wrap.append(el('h3',shortLabels[block]));
+  const grid=el('div',undefined,'grid');
+  S.questions.forEach((q,i)=>{
+   if(q.block!==block) return;
+   const b=el('button',i+1);b.type='button';
+   const o=outcome(q),rev=locked(q);
+   if(rev) b.classList.add(o==='blank'?'blank-r':o);
+   else if(answered(q)) b.classList.add('done');
+   if(isMarked(q)) b.classList.add('marked');
+   if(i===S.cursor){b.classList.add('current');b.setAttribute('aria-current','true')}
+   if(!matches(i)) b.classList.add('dim');
+   const state=rev?{right:'correta',wrong:'incorreta',blank:'em branco'}[o]:answered(q)?'respondida':'em branco';
+   b.setAttribute('aria-label','Questão '+(i+1)+', '+state+(isMarked(q)?', marcada':''));
+   b.addEventListener('click',()=>go(i));
+   grid.append(b);
+  });
+  wrap.append(grid);
+  return wrap;
+ });
+ $('navigator').replaceChildren(...groups);
+
+ const legend=S.submitted||S.mode==='estudo'
+  ?[['var(--ok-soft)','Certa'],['var(--bad-soft)','Errada'],['var(--warn-soft)','Em branco'],['var(--warn)','Marcada']]
+  :[['var(--brand-soft)','Respondida'],['var(--surface)','Em branco'],['var(--warn)','Marcada']];
+ $('legend').replaceChildren(...legend.map(([c,t])=>{const s=el('span');const i=el('i');i.style.background=c;s.append(i,t);return s}));
+}
+function openSide(){$('side').classList.add('open');$('backdrop').hidden=false;$('close-side').focus()}
+function closeSide(){$('side').classList.remove('open');$('backdrop').hidden=true}
+
+// ---------- entrega e resultado ----------
 function submit(){
- const blank=questions.length-Object.keys(answers).length;
- if(blank && !window.confirm('Há '+blank+' questão(ões) em branco. Entregar mesmo assim?')) return;
- submitted=true;
- const score=grade(questions,answers);
- const heading=element('h2',score.points.toLocaleString('pt-BR')+' / 100 pontos');
- heading.tabIndex=-1;
+ const blank=S.questions.filter(q=>!answered(q)).length;
+ const marked=S.marked.length;
+ const warn=[blank&&blank+' em branco',marked&&marked+' marcada(s) para revisar'].filter(Boolean).join(' e ');
+ if(!confirm(warn?'Há '+warn+'. Entregar mesmo assim?':'Entregar o simulado?')) return;
+ S.submitted=true;S.finishedAt=Date.now();S.filter='all';
+ save();
+ startTicker();
+ openResult();
+}
+function openResult(){
+ show('result');
+ const sc=grade(S.questions,S.answers);
+ const blank=S.questions.filter(q=>!answered(q)).length;
+ const wrong=S.questions.length-blank-sc.hits;
  const area=$('result');
- area.replaceChildren(heading,element('p',score.hits+' acertos · '+(40-blank-score.hits)+' erros · '+blank+' em branco'),
-  element('p',score.pass?'Atingiu os critérios mínimos da objetiva.':'Ficou abaixo dos critérios mínimos da objetiva.','status'+(score.pass?'':' fail')),
-  element('p','Português '+score.totals.p+'/10 · Demais gerais '+score.totals.g+'/10 · Específicos '+score.totals.e+'/20'),
-  element('p','Use o cartão-resposta para revisar as questões e ler as justificativas.','meta'));
- area.hidden=false;
- render();
- heading.focus();
+ area.replaceChildren();
+
+ const top=el('div',undefined,'res-top');
+ const ring=el('div',undefined,'score '+(sc.pass?'pass':'fail'));
+ ring.style.setProperty('--v',sc.points);
+ const inner=el('div');inner.append(el('b',sc.points.toLocaleString('pt-BR')),el('span','de 100 pontos','muted small'));
+ ring.append(inner);
+ const info=el('div');
+ const h=el('h2','Resultado do simulado');h.tabIndex=-1;
+ const stats=el('div',undefined,'stats');
+ for(const [v,t] of [[sc.hits,'acertos'],[wrong,'erros'],[blank,'em branco'],[fmtTime(S.finishedAt-S.startedAt),'tempo']]){
+  const d=el('div');d.append(el('b',v),el('span',t,'muted small'));stats.append(d);
+ }
+ info.append(h,el('p',sc.pass?'Atingiu os critérios mínimos da objetiva.':'Ficou abaixo dos critérios mínimos da objetiva.','verdict '+(sc.pass?'pass':'fail')),stats);
+ top.append(ring,info);
+
+ const bars=el('div',undefined,'bars');
+ for(const b of ['p','g','e']){
+  const row=el('div',undefined,'bar-row '+b);
+  const bar=el('div',undefined,'bar');const fill=el('div');fill.style.width=(sc.totals[b]/quotas[b]*100)+'%';bar.append(fill);
+  row.append(el('span',shortLabels[b]),bar,el('b',sc.totals[b]+'/'+quotas[b]));
+  bars.append(row);
+ }
+
+ const byTopic=new Map();
+ for(const q of S.questions){
+  if(outcome(q)==='right') continue;
+  byTopic.set(q.topic,(byTopic.get(q.topic)||0)+1);
+ }
+ const sec=el('div',undefined,'res-section');
+ sec.append(el('h3','Onde você mais perdeu pontos'));
+ if(byTopic.size){
+  const ul=el('ul',undefined,'topics');
+  for(const [t,n] of [...byTopic].sort((a,b)=>b[1]-a[1]).slice(0,8)){
+   const li=el('li');li.append(el('span',t),el('b',n+(n>1?' questões':' questão')));ul.append(li);
+  }
+  sec.append(ul);
+ } else sec.append(el('p','Nenhum erro. Gabaritou!','muted'));
+
+ const actions=el('div',undefined,'actions');
+ const mk=(text,cls,fn)=>{const b=el('button',text,'btn '+cls);b.type='button';b.addEventListener('click',fn);return b};
+ const firstMiss=S.questions.findIndex(q=>outcome(q)!=='right');
+ if(firstMiss>-1) actions.append(mk('Revisar erros e brancos','primary',()=>{S.filter='wrong';openExam(firstMiss)}));
+ actions.append(mk('Revisar todas','',()=>{S.filter='all';openExam(0)}),mk('Novo simulado','ghost',()=>{show('start');refreshStart()}));
+
+ area.append(top,bars,sec,actions);
+ h.focus({preventScroll:true});
 }
-$('bank-info').textContent=bank.length.toLocaleString('pt-BR')+' questões no banco · Funciona offline';
-for(const [title,key] of [['Edital 001/2026 e aditivos','edital'],['Regimento Interno de Quatro Barras','regimento'],['Consulpam · Analista de Licitações e Contratos','analista'],['Consulpam · Técnico de Compras','compras'],['Lei 14.133/2021','lei'],['Lei 4.320/1964','fin'],['Manual de Redação Oficial do Paraná','redacao'],['Lei de Responsabilidade Fiscal','lrf'],['Técnica legislativa · Lei Complementar 95/1998','tecnica'],['Constituição Federal','cf']]){
- const li=element('li');
- li.append(link(title,key));
- $('links').append(li);
+
+// ---------- tema ----------
+function applyTheme(t){
+ if(t) document.documentElement.dataset.theme=t; else delete document.documentElement.dataset.theme;
 }
-$('begin').addEventListener('click',start);
-$('restart').addEventListener('click',start);
-$('back').addEventListener('click',()=>go(cursor-1));
-$('next').addEventListener('click',()=>go(cursor+1));
+$('theme').addEventListener('click',()=>{
+ const dark=document.documentElement.dataset.theme?document.documentElement.dataset.theme==='dark':matchMedia('(prefers-color-scheme: dark)').matches;
+ const next=dark?'light':'dark';
+ applyTheme(next);store.set(THEME_KEY,next);
+});
+applyTheme(store.get(THEME_KEY));
+
+// ---------- eventos ----------
+$('begin').addEventListener('click',begin);
+$('resume').addEventListener('click',resume);
+$('restart').addEventListener('click',()=>{show('start');refreshStart()});
+$('back').addEventListener('click',()=>step(-1));
+$('next').addEventListener('click',()=>step(1));
+$('m-back').addEventListener('click',()=>step(-1));
+$('m-next').addEventListener('click',()=>step(1));
+$('m-card').addEventListener('click',openSide);
+$('close-side').addEventListener('click',closeSide);
+$('backdrop').addEventListener('click',closeSide);
+$('mark').addEventListener('click',toggleMark);
 $('submit').addEventListener('click',submit);
+$('show-result').addEventListener('click',openResult);
+document.addEventListener('keydown',e=>{
+ if($('exam').hidden||e.ctrlKey||e.metaKey||e.altKey) return;
+ if(e.key==='Escape') return closeSide();
+ const k=e.key.toLowerCase();
+ const onRadio=e.target.matches?.('input[type=radio]');
+ const pick={a:0,b:1,c:2,d:3,1:0,2:1,3:2,4:3}[k];
+ if(pick!==undefined){e.preventDefault();choose(pick)}
+ else if(k==='m'&&!S.submitted){e.preventDefault();toggleMark()}
+ else if(!onRadio&&(k==='arrowright'||k==='arrowleft')){e.preventDefault();step(k==='arrowright'?1:-1)}
+});
+
+$('bank-info').textContent=bank.length.toLocaleString('pt-BR')+' questões no banco · Funciona offline · Progresso salvo neste navegador';
+for(const [title,key] of [['Edital 001/2026 e aditivos','edital'],['Regimento Interno de Quatro Barras','regimento'],['Consulpam · Analista de Licitações e Contratos','analista'],['Consulpam · Técnico de Compras','compras'],['Lei 14.133/2021','lei'],['Lei 4.320/1964','fin'],['Manual de Redação Oficial do Paraná','redacao'],['Lei de Responsabilidade Fiscal','lrf'],['Técnica legislativa · Lei Complementar 95/1998','tecnica'],['Constituição Federal','cf']]){
+ const li=el('li');li.append(link(title,key));$('links').append(li);
+}
+refreshStart();
 </script>
 </body>
 </html>
-
-

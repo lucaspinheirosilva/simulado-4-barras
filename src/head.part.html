@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Simulado | Secretário da Mesa Diretiva</title>
+<style>
+:root{color-scheme:light;--bg:#eef3f1;--surface:#fff;--surface-2:#f4f8f6;--ink:#14272b;--muted:#52666a;--line:#d5e1dc;--brand:#0a5c49;--brand-ink:#fff;--brand-soft:#e2f1e9;--ok:#13795b;--ok-soft:#e0f4ea;--bad:#b42339;--bad-soft:#fdecef;--warn:#a65f00;--warn-soft:#fff3dc;--code:#0f2326;--code-ink:#e6f2ee;--shadow:0 1px 2px #0f2a2a14,0 10px 28px #0f2a2a0d;--p:#2f6fb3;--g:#8a5bb8;--e:#0a5c49;--top:#0f2e30;--top-line:#78ae93;--on-ok:#fff;--on-bad:#fff;--on-chip:#fff}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:dark;--bg:#1b1e23;--surface:#23272e;--surface-2:#2a2f37;--ink:#e7e9ec;--muted:#a3abb6;--line:#3a414b;--brand:#3ecf8e;--brand-ink:#0c2118;--brand-soft:#3ecf8e1f;--ok:#3ecf8e;--ok-soft:#3ecf8e1c;--bad:#f2768a;--bad-soft:#f2768a1f;--warn:#f5b54a;--warn-soft:#f5b54a1f;--code:#16191d;--code-ink:#e6e8eb;--shadow:0 1px 2px #0005,0 8px 24px #0003;--p:#6ea8f0;--g:#b28be6;--e:#3ecf8e;--top:#23272e;--top-line:#3ecf8e;--on-ok:#0c2118;--on-bad:#2b0d14;--on-chip:#12161b}}
+:root[data-theme="dark"]{color-scheme:dark;--bg:#1b1e23;--surface:#23272e;--surface-2:#2a2f37;--ink:#e7e9ec;--muted:#a3abb6;--line:#3a414b;--brand:#3ecf8e;--brand-ink:#0c2118;--brand-soft:#3ecf8e1f;--ok:#3ecf8e;--ok-soft:#3ecf8e1c;--bad:#f2768a;--bad-soft:#f2768a1f;--warn:#f5b54a;--warn-soft:#f5b54a1f;--code:#16191d;--code-ink:#e6e8eb;--shadow:0 1px 2px #0005,0 8px 24px #0003;--p:#6ea8f0;--g:#b28be6;--e:#3ecf8e;--top:#23272e;--top-line:#3ecf8e;--on-ok:#0c2118;--on-bad:#2b0d14;--on-chip:#12161b}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:1rem/1.6 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+button,input{font:inherit;color:inherit}button{cursor:pointer}button:disabled{cursor:not-allowed;opacity:.45}
+a{color:var(--brand);text-underline-offset:.15em}
+[hidden]{display:none!important}
+:focus-visible{outline:3px solid var(--warn);outline-offset:2px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.muted{color:var(--muted)}.small{font-size:.875rem}
+h1,h2,h3{line-height:1.2;margin:0}
+/* topo */
+.top{background:var(--top);color:#fff;border-bottom:4px solid var(--top-line)}
+.top-in{width:min(1180px,calc(100% - 32px));margin:auto;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 0}
+.eyebrow{margin:0;font-size:.8rem;color:#ffffffb8}
+.top h1{font-size:clamp(1.1rem,2.6vw,1.45rem);letter-spacing:-.02em}
+.top-tools{display:flex;align-items:center;gap:8px;flex:none}
+.timer{font-variant-numeric:tabular-nums;background:#ffffff1a;padding:4px 10px;border-radius:999px;font-size:.9rem}
+.icon-btn{border:1px solid #ffffff40;background:transparent;color:inherit;border-radius:10px;width:38px;height:38px;display:grid;place-items:center;font-size:1.05rem}
+.side .icon-btn{border-color:var(--line)}
+main{width:min(1180px,calc(100% - 32px));margin:20px auto 48px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:clamp(16px,3vw,28px)}
+/* botões */
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:.6rem 1rem;font-weight:600;min-height:44px;display:inline-flex;align-items:center;justify-content:center;gap:.4rem}
+.btn:hover:not(:disabled){border-color:var(--brand)}
+.btn.primary{background:var(--brand);border-color:var(--brand);color:var(--brand-ink)}
+.btn.ghost{background:transparent}
+.btn.sm{min-height:34px;padding:.3rem .7rem;font-size:.875rem}
+.btn.lg{padding:.8rem 1.4rem;font-size:1.05rem}
+.btn[aria-pressed="true"]{background:var(--warn-soft);border-color:var(--warn);color:var(--warn)}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px}
+/* início */
+.hero h2{font-size:1.5rem;margin-bottom:.35rem}.hero p{margin:.2rem 0}
+.blocks{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:20px 0}
+.block{border:1px solid var(--line);border-left:5px solid var(--c);border-radius:12px;padding:12px 14px;background:var(--surface-2)}
+.block strong{display:block;font-size:1.6rem;color:var(--c);line-height:1.1}
+.block span{font-size:.9rem;color:var(--muted)}
+.b-p{--c:var(--p)}.b-g{--c:var(--g)}.b-e{--c:var(--e)}
+.modes{border:0;padding:0;margin:0;display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.modes legend{font-weight:700;margin-bottom:8px}
+.mode{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);border-radius:12px;padding:12px 14px;cursor:pointer}
+.mode:has(input:checked){border-color:var(--brand);background:var(--brand-soft)}
+.mode input{margin-top:.35rem;accent-color:var(--brand)}
+.mode small{display:block;color:var(--muted)}
+.sources{margin-top:16px}.sources summary{cursor:pointer;font-weight:600}
+/* prova */
+.exam{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:20px;align-items:start}
+.qhead{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.qhead #mark{margin-left:auto}
+.chip{font-size:.78rem;font-weight:700;padding:3px 10px;border-radius:999px;color:var(--on-chip);background:var(--c)}
+.chip.p{--c:var(--p)}.chip.g{--c:var(--g)}.chip.e{--c:var(--e)}
+#qnum:focus,#result h2:focus{outline:none}
+#qnum{font-size:1rem;color:var(--muted);font-weight:600;margin-bottom:6px}
+.q-text{font-size:1.12rem;line-height:1.6;margin:0 0 12px;white-space:pre-line;overflow-wrap:anywhere}
+.q-cases{font-size:1rem;background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+pre.code{background:var(--code);color:var(--code-ink);border-radius:10px;padding:14px 16px;overflow-x:auto;font:.95rem/1.5 ui-monospace,SFMono-Regular,Consolas,monospace;margin:0 0 14px}
+fieldset{border:0;padding:0;margin:0;min-inline-size:0}
+.choices{display:grid;gap:10px;margin-top:6px}
+.choice{display:flex;gap:12px;align-items:flex-start;border:1.5px solid var(--line);border-radius:12px;padding:12px 14px;cursor:pointer;background:var(--surface);transition:border-color .12s,background .12s}
+.choice:hover{border-color:var(--brand)}
+.choice input{position:absolute;opacity:0;pointer-events:none}
+.choice .letter{flex:none;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-weight:700;border:1.5px solid var(--line);font-size:.9rem}
+.choice .txt{overflow-wrap:anywhere;padding-top:2px}
+.choice:has(input:checked){border-color:var(--brand);background:var(--brand-soft)}
+.choice:has(input:checked) .letter{background:var(--brand);border-color:var(--brand);color:var(--brand-ink)}
+.choice:has(input:focus-visible){outline:3px solid var(--warn);outline-offset:2px}
+.choice.locked{cursor:default}.choice.locked:hover{border-color:var(--line)}
+.choice.locked.good{border-color:var(--ok);background:var(--ok-soft)}.choice.locked.good .letter{background:var(--ok);border-color:var(--ok);color:var(--on-ok)}
+.choice.locked.bad{border-color:var(--bad);background:var(--bad-soft)}.choice.locked.bad .letter{background:var(--bad);border-color:var(--bad);color:var(--on-bad)}
+.tag{display:inline-block;margin-left:6px;font-size:.75rem;font-weight:700;padding:1px 8px;border-radius:999px}
+.tag.ok{background:var(--ok);color:var(--on-ok)}.tag.you{background:var(--surface-2);border:1px solid var(--line)}
+.feedback{margin-top:16px;border-radius:12px;padding:14px 16px;border-left:5px solid var(--c);background:var(--surface-2)}
+.feedback.right{--c:var(--ok)}.feedback.wrong{--c:var(--bad)}.feedback.blank{--c:var(--warn)}
+.feedback strong{color:var(--c)}.feedback p{margin:.35rem 0;white-space:pre-line}
+.qnav{display:flex;align-items:center;gap:10px;margin-top:22px;padding-top:16px;border-top:1px solid var(--line)}
+.qnav .kbd-hint{flex:1;text-align:center}
+kbd{font:600 .75rem ui-monospace,monospace;border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;padding:0 5px;background:var(--surface-2)}
+/* cartão */
+.side{position:sticky;top:16px;max-height:calc(100vh - 32px);overflow:auto}
+.side-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.side h2{font-size:1.1rem}
+.meter{height:8px;background:var(--surface-2);border:1px solid var(--line);border-radius:999px;overflow:hidden}
+#meter-fill{height:100%;width:0;background:var(--brand);transition:width .2s}
+#progress-text{margin:6px 0 10px}
+.filters{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.filters button{border:1px solid var(--line);background:transparent;border-radius:999px;padding:3px 10px;font-size:.8rem;min-height:30px}
+.filters button[aria-pressed="true"]{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+.navgroup{margin-bottom:12px}
+.navgroup h3{font-size:.78rem;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin-bottom:6px;display:flex;align-items:center;gap:6px}
+.navgroup h3::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--c)}
+.navgroup.p{--c:var(--p)}.navgroup.g{--c:var(--g)}.navgroup.e{--c:var(--e)}
+.grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.grid button{position:relative;border:1px solid var(--line);background:var(--surface);border-radius:8px;min-height:38px;font-size:.875rem;font-variant-numeric:tabular-nums}
+.grid button.done{background:var(--brand-soft);border-color:var(--brand)}
+.grid button.right{background:var(--ok-soft);border-color:var(--ok);color:var(--ok)}
+.grid button.wrong{background:var(--bad-soft);border-color:var(--bad);color:var(--bad)}
+.grid button.blank-r{background:var(--warn-soft);border-color:var(--warn);color:var(--warn)}
+.grid button.current{outline:2.5px solid var(--ink);outline-offset:1px;font-weight:700}
+.grid button.marked::after{content:"";position:absolute;top:3px;right:3px;width:7px;height:7px;border-radius:50%;background:var(--warn)}
+.grid button.dim{opacity:.25}
+.legend{display:flex;flex-wrap:wrap;gap:4px 12px;margin:6px 0 14px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:4px;vertical-align:-1px;border:1px solid var(--line)}
+.side-actions{display:grid;gap:8px}
+/* resultado */
+.res-top{display:grid;grid-template-columns:auto 1fr;gap:24px;align-items:center}
+.score{width:150px;height:150px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(var(--c) calc(var(--v)*1%),var(--surface-2) 0);position:relative}
+.score::before{content:"";position:absolute;inset:14px;border-radius:50%;background:var(--surface)}
+.score div{position:relative;text-align:center;line-height:1.1}.score b{font-size:2.1rem;display:block}
+.score.pass{--c:var(--ok)}.score.fail{--c:var(--bad)}
+.verdict{font-weight:700;font-size:1.15rem}.verdict.pass{color:var(--ok)}.verdict.fail{color:var(--bad)}
+.stats{display:flex;gap:18px;flex-wrap:wrap;margin:8px 0}
+.stats b{font-size:1.25rem;display:block}
+.bars{display:grid;gap:12px;margin:24px 0}
+.bar-row{display:grid;grid-template-columns:150px 1fr 60px;gap:12px;align-items:center}
+.bar{height:12px;border-radius:999px;background:var(--surface-2);border:1px solid var(--line);overflow:hidden}
+.bar div{height:100%;background:var(--c)}
+.bar-row.p{--c:var(--p)}.bar-row.g{--c:var(--g)}.bar-row.e{--c:var(--e)}
+.topics{list-style:none;padding:0;margin:8px 0 0;display:grid;gap:6px}
+.topics li{display:flex;justify-content:space-between;gap:12px;padding:8px 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface-2);font-size:.92rem}
+.topics li b{color:var(--bad);flex:none}
+.res-section{margin-top:22px}.res-section h3{font-size:1rem;margin-bottom:6px}
+/* mobile */
+.only-mobile{display:none!important}
+.backdrop{position:fixed;inset:0;background:#0008;z-index:20}
+@media (max-width:860px){
+ .exam{grid-template-columns:1fr}
+ .only-mobile{display:flex!important}
+ .side{position:fixed;left:0;right:0;bottom:0;top:auto;z-index:30;max-height:82vh;border-radius:18px 18px 0 0;transform:translateY(105%);transition:transform .2s;box-shadow:0 -10px 30px #0004}
+ .side.open{transform:none}
+ .bottombar{position:fixed;left:0;right:0;bottom:0;z-index:10;gap:8px;padding:10px 16px calc(10px + env(safe-area-inset-bottom));background:var(--surface);border-top:1px solid var(--line)}
+ .bottombar .btn{flex:1}
+ .exam-on main{padding-bottom:72px}
+ .qnav .kbd-hint{display:none}
+ .grid{grid-template-columns:repeat(10,1fr)}
+ .blocks,.modes{grid-template-columns:1fr}
+ .res-top{grid-template-columns:1fr;justify-items:center;text-align:center}
+ .stats{justify-content:center}
+ .bar-row{grid-template-columns:100px 1fr 48px}
+}
+@media (max-width:420px){.grid{grid-template-columns:repeat(8,1fr)}.q-text{font-size:1.04rem}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<header class="top"><div class="top-in">
+ <div><p class="eyebrow">Câmara Municipal de Quatro Barras · Edital 001/2026</p><h1>Simulado · Secretário da Mesa Diretiva</h1></div>
+ <div class="top-tools"><span id="timer" class="timer" title="Tempo decorrido" hidden>00:00:00</span><button id="theme" class="icon-btn" type="button" aria-label="Alternar tema claro/escuro">◐</button></div>
+</div></header>
+<main>
+ <section id="start">
+  <div class="card hero">
+   <h2>Monte sua tentativa</h2>
+   <p class="muted">40 questões sorteadas do banco com alternativas embaralhadas · 2,5 pontos por questão.</p>
+   <div class="blocks">
+    <div class="block b-p"><strong>10</strong><span>Língua Portuguesa</span></div>
+    <div class="block b-g"><strong>10</strong><span>Matemática e Raciocínio Lógico, Informática, Direito Administrativo e Constitucional</span></div>
+    <div class="block b-e"><strong>20</strong><span>Conhecimentos Específicos</span></div>
+   </div>
+   <fieldset class="modes"><legend>Modo</legend>
+    <label class="mode"><input type="radio" name="mode" value="prova" checked><span><b>Prova</b><small>Gabarito só depois da entrega, como no dia.</small></span></label>
+    <label class="mode"><input type="radio" name="mode" value="estudo"><span><b>Estudo</b><small>Correção e justificativa logo após cada resposta.</small></span></label>
+   </fieldset>
+   <div class="actions"><button class="btn primary lg" id="begin" type="button">Iniciar simulado</button><button class="btn lg" id="resume" type="button" hidden></button></div>
+   <p class="muted small" id="bank-info"></p>
+  </div>
+  <details class="card sources"><summary>Banco e fontes</summary><p class="small">O banco reúne questões inéditas, incluindo variações de exercícios e comparações de casos, além de adaptações identificadas dos cadernos de Pindorama/SP de 2026. O material foi organizado pelo Anexo III do edital. O edital fixa 10 questões para o bloco combinado, sem cotas por disciplina dentro dele.</p><ul id="links" class="small"></ul></details>
+ </section>
+
+ <section id="exam" class="exam" hidden>
+  <article class="card">
+   <div class="qhead"><span id="chip" class="chip"></span><span id="topic" class="muted small"></span><button id="mark" class="btn ghost sm" type="button" aria-pressed="false">⚑ Marcar p/ revisar</button></div>
+   <h2 id="qnum" tabindex="-1"></h2>
+   <div id="question"></div>
+   <fieldset><legend class="sr">Alternativas</legend><div id="choices" class="choices"></div></fieldset>
+   <div id="feedback" class="feedback" aria-live="polite" hidden></div>
+   <div class="qnav"><button class="btn" id="back" type="button">← Anterior</button><span class="muted small kbd-hint"><kbd>A</kbd>–<kbd>D</kbd> responder · <kbd>←</kbd><kbd>→</kbd> navegar · <kbd>M</kbd> marcar</span><button class="btn primary" id="next" type="button">Próxima →</button></div>
+  </article>
+  <aside id="side" class="card side" aria-label="Cartão-resposta">
+   <div class="side-head"><h2>Cartão-resposta</h2><button class="icon-btn only-mobile" id="close-side" type="button" aria-label="Fechar cartão">✕</button></div>
+   <div class="meter" aria-hidden="true"><div id="meter-fill"></div></div>
+   <p id="progress-text" class="muted small" aria-live="polite"></p>
+   <div id="filters" class="filters" role="group" aria-label="Filtrar questões"></div>
+   <div id="navigator"></div>
+   <div id="legend" class="legend small muted"></div>
+   <div class="side-actions"><button class="btn primary" id="submit" type="button">Entregar simulado</button><button class="btn" id="show-result" type="button" hidden>Ver resultado</button><button class="btn ghost" id="restart" type="button">Novo simulado</button></div>
+  </aside>
+  <div class="bottombar only-mobile"><button class="btn" id="m-back" type="button" aria-label="Questão anterior">←</button><button class="btn" id="m-card" type="button">Cartão</button><button class="btn primary" id="m-next" type="button" aria-label="Próxima questão">→</button></div>
+ </section>
+ <div id="backdrop" class="backdrop" hidden></div>
+
+ <section id="result" class="card" hidden aria-live="polite"></section>
+</main>
+<noscript>Ative o JavaScript no navegador para usar o simulado.</noscript>
+<script>
