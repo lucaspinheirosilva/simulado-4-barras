@@ -64,6 +64,8 @@ main{width:min(1180px,calc(100% - 32px));margin:20px auto 48px}
 .qhead #mark{margin-left:auto}
 .chip{font-size:.78rem;font-weight:700;padding:3px 10px;border-radius:999px;color:var(--on-chip);background:var(--c)}
 .chip.p{--c:var(--p)}.chip.g{--c:var(--g)}.chip.e{--c:var(--e)}
+.level{font-size:.74rem;font-weight:700;padding:2px 9px;border-radius:999px;border:1px solid var(--c);color:var(--c);background:var(--s)}
+.level.facil{--c:var(--ok);--s:var(--ok-soft)}.level.media{--c:var(--warn);--s:var(--warn-soft)}.level.dificil{--c:var(--bad);--s:var(--bad-soft)}
 #qnum:focus,#result h2:focus{outline:none}
 #qnum{font-size:1rem;color:var(--muted);font-weight:600;margin-bottom:6px}
 .q-text{font-size:1.12rem;line-height:1.6;margin:0 0 12px;white-space:pre-line;overflow-wrap:anywhere}
@@ -940,7 +942,7 @@ kbd{font:600 .75rem ui-monospace,monospace;border:1px solid var(--line);border-b
 
  <section id="exam" class="exam" hidden>
   <article class="card">
-   <div class="qhead"><span id="chip" class="chip"></span><span id="topic" class="muted small"></span><button id="mark" class="btn ghost sm" type="button" aria-pressed="false">⚑ Marcar p/ revisar</button></div>
+   <div class="qhead"><span id="chip" class="chip"></span><span id="level" class="level" title="Dificuldade estimada pelo formato da questão"></span><span id="topic" class="muted small"></span><button id="mark" class="btn ghost sm" type="button" aria-pressed="false">⚑ Marcar p/ revisar</button></div>
    <h2 id="qnum" tabindex="-1"></h2>
    <div id="question"></div>
    <fieldset><legend class="sr">Alternativas</legend><div id="choices" class="choices"></div></fieldset>
@@ -1043,10 +1045,12 @@ for(const [type,model] of math) for(let n=3;n<13;n++){
  const old=(type==='Juros simples'&&n===5)||(type==='Geometria plana'&&n===4);
  add('g','Matemática e Raciocínio Lógico · '+type,type+' '+n,q,[a,b,c,d].map(num),e,old?'analista':'',old?'Adaptada de prova anterior · Pindorama/SP, 2026':'Questão inédita');
 }
+const conceptInfo=new Map();
 function addConcepts(block,topic,source,raw,limit=5){
  const rows=words(raw);
  for(const [i,row] of rows.entries()){
   const [term,definition,example,reference]=row;
+  conceptInfo.set(term,{name:term,def:definition,ex:example,topic});
   const alternatives=shift(rows,i).slice(1,4);
   if(alternatives.length!==3) throw Error(topic+' exige ao menos quatro conceitos');
   const why=definition+'. '+(reference||'');
@@ -2075,6 +2079,250 @@ function caseCombinations(first,second,index,alternatives){
  ];
 }
 
+// ===== Estilos de enunciado (padrão de banca) =====
+// Cada questão recebe um formato sorteado de forma determinística pelo id.
+const ROM=['I','II','III','IV'];
+const seeded=seed=>{let a=(seed*2654435761)>>>0;return()=>{a=(a+0x6D2B79F5)>>>0;let t=a;t=Math.imul(t^t>>>15,t|1);t^=t+Math.imul(t^t>>>7,t|61);return((t^t>>>14)>>>0)/4294967296}};
+const lowerStart=s=>/^[A-ZÁÉÍÓÚÂÊÔÃÕÇ](?:[a-záéíóúâêôãõç]|\s)/.test(s)?s[0].toLowerCase()+s.slice(1):s;
+const upperStart=s=>s?s[0].toUpperCase()+s.slice(1):s;
+const noDot=s=>s.trim().replace(/[.]+$/,'');
+const valueText=v=>/\d/.test(v)&&v.length<30?v:'“'+v+'”';
+const conceptsByTopic=new Map();
+for(const c of conceptInfo.values()){
+ if(!conceptsByTopic.has(c.topic)) conceptsByTopic.set(c.topic,[]);
+ conceptsByTopic.get(c.topic).push(c);
+}
+// Tema com artigo, para montar “acerca do…”, “no que se refere à…”.
+const topicArticles={
+ 'Informática':'a Informática',
+ 'Direito Administrativo e Constitucional':'o Direito Administrativo e Constitucional',
+ 'Regimento Interno de Quatro Barras':'o Regimento Interno de Quatro Barras',
+ 'Processo legislativo':'o processo legislativo',
+ 'Técnica legislativa':'a técnica legislativa',
+ 'Comunicações e atos oficiais':'as comunicações e os atos oficiais',
+ 'Orçamento e princípios':'o orçamento e seus princípios',
+ 'Execução orçamentária e financeira':'a execução orçamentária e financeira',
+ 'Finanças públicas e responsabilidade fiscal':'as finanças públicas e a responsabilidade fiscal',
+ 'Modalidades e contratação pública':'as modalidades de licitação e a contratação pública',
+ 'Atos no processo de contratação':'os atos do processo de contratação',
+ 'Princípios e instrumentos de licitação':'os princípios e instrumentos de licitação'
+};
+const contractions={de:{o:'do',a:'da',os:'dos',as:'das'},a:{o:'ao',a:'à',os:'aos',as:'às'}};
+function topicWith(prep,topic){
+ const phrase=topicArticles[topic]||topic;
+ const [article,...rest]=phrase.split(' ');
+ const merged=prep&&contractions[prep]?.[article];
+ if(merged) return merged+' '+rest.join(' ');
+ return (prep?prep+' ':'')+(topicArticles[topic]?phrase:topic);
+}
+const defStatement=(c,src=c)=>'O conceito de “'+c.name+'” corresponde a: '+lowerStart(noDot(src.def))+'.';
+const caseStatement=(c,src=c)=>'A seguinte situação caracteriza “'+c.name+'”: '+lowerStart(noDot(src.ex))+'.';
+const conceptWhy=c=>c.name+': '+noDot(c.def)+'.';
+const otherConcept=(c,pool,r)=>shuffle(pool.filter(x=>x!==c),r)[0];
+function conceptSet(anchors,pool,size,r){
+ const rest=shuffle(pool.filter(c=>!anchors.includes(c)),r);
+ return shuffle([...anchors,...rest].slice(0,size),r);
+}
+function distinctOptions(correct,make,r){
+ const options=[correct];
+ for(let guard=0;options.length<4&&guard<200;guard++){
+  const candidate=make(r);
+  if(!options.includes(candidate)) options.push(candidate);
+ }
+ return options.length===4?options:null;
+}
+const conceptStyles={
+ assertivas(anchors,pool,topic,r){
+  const items=conceptSet(anchors,pool,3,r);
+  const patterns=[[1,0,0],[0,1,0],[0,0,1],[1,1,0],[1,0,1],[0,1,1],[1,1,1]];
+  const label=p=>{const ids=p.map((v,i)=>v?ROM[i]:'').filter(Boolean);return ids.length===3?'I, II e III.':'Apenas '+ids.join(' e ')+'.'};
+  const truth=patterns[Math.floor(r()*patterns.length)];
+  const statement=r()<.65?defStatement:caseStatement;
+  const lines=[],why=[];
+  items.forEach((c,i)=>{
+   const src=truth[i]?c:otherConcept(c,pool,r);
+   lines.push(ROM[i]+'. '+statement(c,src));
+   why.push(ROM[i]+'. '+(truth[i]?'Correta. ':'Incorreta. A descrição corresponde a “'+src.name+'”. ')+conceptWhy(c));
+  });
+  const correct=label(truth);
+  const lead=r()<.5?'Sobre '+topicWith('',topic)+', analise as afirmativas a seguir.':'Considere as seguintes afirmativas acerca '+topicWith('de',topic)+'.';
+  return {question:lead+'\n\n'+lines.join('\n')+'\n\nEstá correto o que se afirma em',
+   options:[correct,...shuffle(patterns.map(label).filter(x=>x!==correct),r).slice(0,3)],correct,explanation:why.join('\n')};
+ },
+ vf(anchors,pool,topic,r){
+  const items=conceptSet(anchors,pool,4,r);
+  let truth;
+  do truth=items.map(()=>r()<.5); while(truth.every(Boolean)||truth.every(t=>!t));
+  const statement=r()<.65?defStatement:caseStatement;
+  const lines=[],why=[];
+  items.forEach((c,i)=>{
+   const src=truth[i]?c:otherConcept(c,pool,r);
+   lines.push('( ) '+statement(c,src));
+   why.push((i+1)+'ª: '+(truth[i]?'V. ':'F. A descrição corresponde a “'+src.name+'”. ')+conceptWhy(c));
+  });
+  const seq=t=>t.map(v=>v?'V':'F').join(' – ');
+  const correct=seq(truth);
+  const options=distinctOptions(correct,rand=>seq(truth.map(v=>rand()<.4?!v:v)),r);
+  return options&&{question:'Acerca '+topicWith('de',topic)+', julgue as afirmativas a seguir como verdadeiras (V) ou falsas (F).\n\n'+lines.join('\n')+'\n\nA sequência correta, de cima para baixo, é',
+   options,correct,explanation:why.join('\n')};
+ },
+ colunas(anchors,pool,topic,r){
+  const first=conceptSet(anchors,pool,4,r);
+  const second=shuffle(first,r);
+  const useCase=r()<.4;
+  const seq=list=>list.map(c=>first.indexOf(c)+1).join(' – ');
+  const correct=seq(second);
+  const options=distinctOptions(correct,rand=>seq(shuffle(first,rand)),r);
+  return options&&{question:'Relacione os conceitos '+topicWith('de',topic)+' (Coluna I) '+(useCase?'às situações que os ilustram':'às respectivas definições')+' (Coluna II).\n\n'+
+   'Coluna I\n'+first.map((c,i)=>(i+1)+'. '+c.name).join('\n')+'\n\nColuna II\n'+second.map(c=>'( ) '+noDot(useCase?c.ex:c.def)+'.').join('\n')+
+   '\n\nA sequência correta, de cima para baixo, é',options,correct,explanation:first.map(conceptWhy).join('\n')};
+ },
+ incorreta(anchors,pool,topic,r){
+  const items=conceptSet(anchors,pool,4,r);
+  const wrong=Math.floor(r()*4);
+  const outsider=shuffle(pool.filter(c=>!items.includes(c)),r)[0];
+  if(!outsider) return null;
+  const options=items.map((c,i)=>c.name+': '+lowerStart(noDot(i===wrong?outsider.def:c.def))+'.');
+  const correct=options[wrong];
+  const lead=r()<.5?'Acerca '+topicWith('de',topic)+', assinale a alternativa INCORRETA.':'Considerando '+topicWith('',topic)+', todas as alternativas a seguir estão corretas, EXCETO:';
+  return {question:lead,options:[correct,...options.filter(o=>o!==correct)],correct,
+   explanation:'A alternativa atribui a “'+items[wrong].name+'” a descrição de “'+outsider.name+'”. '+conceptWhy(items[wrong])};
+ },
+ correto(anchors,pool,topic,r){
+  const target=anchors[0];
+  const items=conceptSet([target],pool,4,r);
+  const statement=r()<.6?defStatement:caseStatement;
+  const lower=r()<.5;
+  const options=items.map(c=>{const text=statement(c,c===target?c:otherConcept(c,pool,r));return lower?lowerStart(text):text});
+  const correct=options[items.indexOf(target)];
+  const lead=lower?'No que se refere '+topicWith('a',topic)+', é correto afirmar que':'Com relação '+topicWith('a',topic)+', assinale a alternativa correta.';
+  return {question:lead,options:[correct,...options.filter(o=>o!==correct)],correct,explanation:conceptWhy(target)};
+ },
+ caso(anchors,pool,topic,r){
+  const target=anchors[0];
+  const options=conceptSet([target],pool,4,r).map(c=>c.name);
+  return {question:'Considere a situação hipotética a seguir.\n\n'+noDot(target.ex)+'.\n\nÀ luz '+topicWith('de',topic)+', o conceito aplicável à situação descrita é',
+   options:[target.name,...options.filter(o=>o!==target.name)],correct:target.name,explanation:conceptWhy(target)};
+ }
+};
+function conceptDirect(q){
+ const s=q.question;
+ let m;
+ if((m=s.match(/^Qual conceito corresponde a esta descrição\? ([\s\S]+)$/))) return 'Assinale a alternativa que apresenta o conceito correspondente à seguinte descrição: '+lowerStart(m[1]);
+ if((m=s.match(/^Em (.+), qual opção explica melhor “(.+)”\?$/))) return 'No âmbito de '+m[1]+', assinale a alternativa que melhor define “'+m[2]+'”.';
+ if((m=s.match(/^Qual conceito se aplica ao caso a seguir\? ([\s\S]+)$/))) return 'Considere a situação hipotética a seguir.\n\n'+noDot(m[1])+'.\n\nO conceito aplicável à situação descrita é';
+ if((m=s.match(/^Qual situação ilustra “(.+)”\?$/))) return 'Assinale a alternativa que descreve situação em que se verifica “'+m[1]+'”.';
+ if(s.includes('qual associação entre conceito e definição')) return 'No âmbito de '+q.topic+', assinale a alternativa que associa corretamente o conceito à respectiva definição.';
+ return null;
+}
+const claimPattern=/^([\s\S]*?)\b[Qq]ual (?:(é|foi|será|era) )?(o|a|os|as|seu|sua) ([^?]+)\?\s*$/;
+function claimParts(q){
+ if(q.question.includes('\n')) return null;
+ const m=q.question.match(claimPattern);
+ if(!m) return null;
+ let lead=m[1].trim();
+ const quoted=lead.match(/^(?:Leia:\s*)?“([^”]+)”$/);
+ if(quoted) lead='No trecho “'+quoted[1]+'”,';
+ const start=!lead||!lead.endsWith(',');
+ return {lead:lead?lead+' ':'',start,subject:m[3]+' '+m[4],verb:m[2]||'é'};
+}
+const nounGender={versão:'a',opção:'a',frase:'a',redação:'a',reescrita:'a',alternativa:'a',conclusão:'a',expressão:'a',palavra:'a',forma:'a',passagem:'a',relação:'a',conector:'o',trecho:'o',efeito:'o'};
+const nounPattern=new RegExp('^([\\s\\S]*?)\\b(?:[Qq]ual|[Qq]ue) ('+Object.keys(nounGender).join('|')+') (?!de |da |do )([^?]+)\\?\\s*$');
+const sentenceStart=lead=>!lead.trim()||/[.”?!:]$/.test(lead.trim());
+const codePattern=/^(?:O que será exibido ao executar o trecho completo\?|Qual é o resultado exibido\?)\n\n([\s\S]+)$/;
+const genericStyles={
+ direta(q){
+  const code=q.question.match(codePattern);
+  if(code) return {question:'Analise o código abaixo.\n\n'+code[1]+'\n\nAssinale a alternativa que apresenta a saída produzida pela execução.'};
+  const c=claimParts(q);
+  if(c) return {question:c.lead+(c.start?'Assinale':'assinale')+' a alternativa que indica '+c.subject+'.'};
+  if(q.question.includes('\n')) return null;
+  let m=q.question.match(nounPattern);
+  if(m) return {question:m[1]+(sentenceStart(m[1])?'Assinale':'assinale')+' '+nounGender[m[2]]+' '+m[2]+' que '+m[3]+'.'};
+  m=q.question.match(/^([\s\S]*?)(Quant[oa]s? [^?]+)\?\s*$/);
+  if(m&&sentenceStart(m[1])) return {question:m[1]+'Assinale a alternativa que indica '+lowerStart(m[2])+'.'};
+  return null;
+ },
+ incompleto(q){
+  const code=q.question.match(codePattern);
+  if(code) return {question:'Considere o trecho de código a seguir.\n\n'+code[1]+'\n\nAo final da execução, o valor exibido será'};
+  const c=claimParts(q);
+  return c&&{question:c.lead+(c.start?upperStart(c.subject):c.subject)+' '+c.verb};
+ },
+ correto(q){
+  const code=q.question.match(codePattern);
+  const say=o=>'será exibido '+o+'.';
+  if(code) return {question:'Considere o trecho de código a seguir.\n\n'+code[1]+'\n\nSobre a execução desse trecho, é correto afirmar que',options:q.options.map(say),correct:say(q.correct)};
+  const c=claimParts(q);
+  if(!c) return null;
+  const say2=o=>c.subject+' '+c.verb+' '+valueText(o)+'.';
+  const lead=c.lead+(c.start?(c.lead?'Com base nessas informações, é':'É'):'é')+' correto afirmar que';
+  return {question:lead,options:q.options.map(say2),correct:say2(q.correct)};
+ },
+ assertivas(q,r,claimable){
+  if(q.block!=='p'||!claimParts(q)) return null;
+  const family=(claimable.get(q.family)||[]).filter(x=>x.id!==q.id&&x.question!==q.question);
+  if(family.length<2) return null;
+  const items=shuffle([q,...shuffle(family,r).slice(0,2)],r);
+  const patterns=[[1,0,0],[0,1,0],[0,0,1],[1,1,0],[1,0,1],[0,1,1],[1,1,1]];
+  const label=p=>{const ids=p.map((v,i)=>v?ROM[i]:'').filter(Boolean);return ids.length===3?'I, II e III.':'Apenas '+ids.join(' e ')+'.'};
+  const truth=patterns[Math.floor(r()*patterns.length)];
+  const lines=[],why=[];
+  items.forEach((x,i)=>{
+   const c=claimParts(x);
+   const value=truth[i]?x.correct:shuffle(x.options.filter(o=>o!==x.correct),r)[0];
+   lines.push(ROM[i]+'. '+upperStart(c.lead+c.subject+' '+c.verb+' '+valueText(value)+'.'));
+   why.push(ROM[i]+'. '+(truth[i]?'Correta. ':'Incorreta. A resposta adequada é '+valueText(x.correct)+'. ')+x.explanation);
+  });
+  const correct=label(truth);
+  return {question:'Analise as afirmativas a seguir.\n\n'+lines.join('\n')+'\n\nEstá correto o que se afirma em',
+   options:[correct,...shuffle(patterns.map(label).filter(x=>x!==correct),r).slice(0,3)],correct,explanation:why.join('\n')};
+ }
+};
+const styleWeights={
+ concept:[['direta',14],['correto',12],['assertivas',16],['vf',12],['colunas',14],['incorreta',12],['caso',6],['julgamento',14]],
+ generic:[['direta',30],['incompleto',20],['correto',18],['assertivas',10],['julgamento',22]]
+};
+function pickStyle(weights,r){
+ const total=weights.reduce((sum,[,w])=>sum+w,0);
+ let roll=r()*total;
+ for(const [name,w] of weights){ if((roll-=w)<0) return name; }
+ return weights[0][0];
+}
+function conceptAnchors(q){
+ if(q.question.startsWith('Associe cada situação')){
+  const m=q.correct.match(/^I\. (.+?)  \/  II\. (.+)$/);
+  const left=m&&conceptInfo.get(m[1]),right=m&&conceptInfo.get(m[2]);
+  if(!left) return null;
+  return right&&right.topic===left.topic&&right!==left?[left,right]:[left];
+ }
+ const c=conceptInfo.get(q.family);
+ return c&&c.topic===q.topic?[c]:null;
+}
+function restyle(q,claimable){
+ const r=seeded(q.id);
+ const anchors=conceptAnchors(q);
+ let style=pickStyle(anchors?styleWeights.concept:styleWeights.generic,r);
+ if(style==='julgamento') return null;
+ let change=null;
+ if(anchors){
+  if(style==='direta'){
+   if(q.question.startsWith('Associe cada situação')){
+    const both=o=>o.replace(/^I\. (.+?)  \/  II\. (.+)$/,'$1 e $2');
+    change={question:'Considere as situações a seguir.'+q.question.slice(q.question.indexOf('\n\n'))+'\n\nOs conceitos que caracterizam as situações I e II são, respectivamente,',
+     options:q.options.map(both),correct:both(q.correct)};
+   } else {
+    const question=conceptDirect(q);
+    change=question&&{question};
+   }
+  } else change=conceptStyles[style](anchors,conceptsByTopic.get(anchors[0].topic),anchors[0].topic,r);
+ } else {
+  change=genericStyles[style](q,r,claimable);
+  if(!change){ change=genericStyles.direta(q); style='direta'; }
+ }
+ return {...q,...(change||{}),style:change?style:'original'};
+}
+
 function rewriteBank(approved){
  const referenceBySubject = new Map();
  for(const question of approved){
@@ -2093,6 +2341,12 @@ function rewriteBank(approved){
   const pool=legacyGroups.get(key);
   questions.forEach((q,index)=>replacements.set(pool[index].id,q));
  }
+ const claimable = new Map();
+ for(const q of bank){
+  if(!claimParts(q)) continue;
+  if(!claimable.has(q.family)) claimable.set(q.family,[]);
+  claimable.get(q.family).push(q);
+ }
  const revised = new Map();
  for(const [key,pool] of legacyGroups){
   const peers = pool;
@@ -2102,6 +2356,11 @@ function rewriteBank(approved){
    const replacement = replacements.get(q.id);
    if(replacement){
     revised.set(q.id,{...replacement,id:q.id,family:'Questão autoral · '+replacement.topic});
+    continue;
+   }
+   const styled = restyle(q,claimable);
+   if(styled){
+    revised.set(q.id,styled);
     continue;
    }
    const offset = 1+((index*37)%Math.floor(peers.length/2));
@@ -2193,6 +2452,19 @@ const editorialBank = [
  {"id":40,"block":"e","topic":"Garantia de proposta","family":"Garantia de proposta","question":"Em licitação sujeita à Lei 14.133/2021, um participante recolheu garantia de proposta exigida no edital. Após vencer e ser regularmente convocado, recusou-se a assinar o contrato sem justificativa. O que a lei estabelece quanto à garantia de proposta?","options":["A recusa implica execução do valor integral da garantia de proposta.","A garantia deve ser devolvida, porque a recusa ocorreu antes da assinatura contratual.","A garantia só pode ser executada se a Administração demonstrar prejuízo financeiro no mesmo valor.","A garantia será retida apenas até a convocação do participante seguinte e então integralmente devolvida."],"correct":"A recusa implica execução do valor integral da garantia de proposta.","explanation":"O art. 58, § 3º, da Lei 14.133/2021 prevê a execução integral da garantia na hipótese de recusa a assinar o contrato.","source":"lei","origin":"Questão inédita · prova de referência"}
 ];
 rewriteBank(editorialBank);
+
+// Dificuldade estimada pelo formato do enunciado (não há taxa de acerto real para calibrar).
+const levelNames={facil:'Fácil',media:'Média',dificil:'Difícil'};
+const levelByStyle={direta:'facil',incompleto:'facil',caso:'facil',original:'facil',correto:'media',incorreta:'media',colunas:'media',resolucao:'media',assertivas:'dificil',vf:'dificil',julgamento:'dificil',referencia:'dificil'};
+function styleOf(q){
+ if(q.style) return q.style;
+ const origin=q.origin||'';
+ if(origin.includes('prova de referência')) return 'referencia';
+ if(origin.includes('julgamento')) return 'julgamento';
+ if(origin.includes('resolução')) return 'resolucao';
+ return 'original';
+}
+const levelOf=q=>levelByStyle[styleOf(q)]||'media';
 
 const $=id=>document.getElementById(id);
 const KEY='simulado4b:tentativa:v1';
@@ -2386,13 +2658,14 @@ function renderQuestion(q){
   }
   return;
  }
- const cut=q.question.indexOf('\n\n');
- if(cut<0){box.append(el('p',q.question,'q-text'));return}
- box.append(el('p',q.question.slice(0,cut),'q-text'));
- const rest=q.question.slice(cut+2);
- if(/Python|JavaScript/.test(q.topic)){
-  const pre=el('pre',undefined,'code');pre.append(el('code',rest));box.append(pre);
- } else box.append(el('p',rest,'q-text q-cases'));
+ // Enunciado em blocos: abertura, quadros intermediários (texto ou código) e comando final.
+ const parts=q.question.split('\n\n');
+ const code=/Python|JavaScript/.test(q.topic);
+ parts.forEach((part,i)=>{
+  if(i===0||(i===parts.length-1&&parts.length>2)){box.append(el('p',part,'q-text'));return}
+  if(code){const pre=el('pre',undefined,'code');pre.append(el('code',part));box.append(pre)}
+  else box.append(el('p',part,'q-text q-cases'));
+ });
 }
 function render(){
  const q=cur();
@@ -2400,6 +2673,9 @@ function render(){
  const lock=locked(q);
  $('chip').textContent=groupLabels()[groupFor(q)];
  $('chip').className='chip '+q.block;
+ const level=levelOf(q);
+ $('level').textContent=levelNames[level];
+ $('level').className='level '+level;
  $('topic').textContent=q.topic;
  $('qnum').textContent='Questão '+(S.cursor+1)+' de '+S.questions.length+' · '+questionWeight(S.questions.length);
  renderQuestion(q);
